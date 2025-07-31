@@ -779,6 +779,7 @@ protected:
 
 	Outfit_t currentOutfit;
 	Outfit_t defaultOutfit;
+	uint16_t currentMount;
 
 	Position lastPosition;
 	LightInfo internalLight;
@@ -884,7 +885,7 @@ private:
 		walk.calculatedStepSpeed = 1;
 		const auto tileFriction = walk.groundSpeed;
 		if (stepSpeed > -Creature::speedB) {
-			const auto formula = (1000 * tileFriction) / (Creature::speedA * std::log(stepSpeed + Creature::speedB) - 0.5 + Creature::speedC) - 1.;
+			const auto formula = std::floor((Creature::speedA * log(stepSpeed + Creature::speedB) + Creature::speedC) + .5);
 			walk.calculatedStepSpeed = static_cast<uint16_t>(std::max(formula, 1.));
 		}
 

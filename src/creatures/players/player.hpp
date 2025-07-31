@@ -84,6 +84,7 @@ enum SpeakClasses : uint8_t;
 enum ChannelEvent_t : uint8_t;
 enum SquareColor_t : uint8_t;
 enum Resource_t : uint8_t;
+enum VirtueMonk_t : uint8_t;
 
 using GuildWarVector = std::vector<uint32_t>;
 using StashContainerList = std::vector<std::pair<std::shared_ptr<Item>, uint32_t>>;
@@ -210,19 +211,25 @@ public:
 		return CREATURETYPE_PLAYER;
 	}
 
-	uint8_t getLastMount() const;
-	uint8_t getCurrentMount() const;
-	void setCurrentMount(uint8_t mountId);
+	uint16_t getLastMount() const;
+	uint16_t getCurrentMount() const;
+	void setCurrentMount(uint16_t mountId);
 	bool isMounted() const {
 		return defaultOutfit.lookMount != 0;
 	}
 	bool toggleMount(bool mount);
-	bool tameMount(uint8_t mountId);
-	bool untameMount(uint8_t mountId);
+	bool tameMount(uint16_t mountId);
+	bool untameMount(uint16_t mountId);
 	bool hasMount(const std::shared_ptr<Mount> &mount) const;
 	bool hasAnyMount() const;
-	uint8_t getRandomMountId() const;
+	uint16_t getRandomMountId() const;
 	void dismount();
+
+	void setOutfitsModified(bool modified);
+	void setMountsModified(bool modified);
+	bool isOutfitsModified() const;
+	bool isMountsModified() const;
+
 	uint16_t getDodgeChance() const;
 
 	uint8_t isRandomMounted() const;
@@ -641,6 +648,8 @@ public:
 	bool openShopWindow(const std::shared_ptr<Npc> &npc, const std::vector<ShopBlock> &shopItems = {});
 	bool closeShopWindow();
 	bool updateSaleShopList(const std::shared_ptr<Item> &item);
+	void updateSaleShopList();
+	void updateState();
 	bool hasShopItemForSale(uint16_t itemId, uint8_t subType) const;
 
 	void setChaseMode(bool mode);
@@ -659,8 +668,13 @@ public:
 	static bool lastHitIsPlayer(const std::shared_ptr<Creature> &lastHitCreature);
 
 	// stash functions
-	bool addItemFromStash(uint16_t itemId, uint32_t itemCount);
+	ReturnValue addItemFromStash(uint16_t itemId, uint32_t itemCount);
 	void stowItem(const std::shared_ptr<Item> &item, uint32_t count, bool allItems);
+
+	std::vector<std::shared_ptr<Container>> getAllContainers(bool onlyFromMainBackpack = true) const;
+	std::shared_ptr<Container> getBackpack() const;
+
+	ReturnValue removeItem(const std::shared_ptr<Item> &item, uint32_t count = 0);
 
 	void changeHealth(int32_t healthChange, bool sendHealthChange = true) override;
 	void changeMana(int32_t manaChange) override;
@@ -1397,6 +1411,24 @@ public:
 
 	void addDeflectCondition(std::string source, ConditionType_t conditionType, uint8_t chance);
 
+	// Monk udpate
+	void sendHarmonyProtocol() const;
+	uint8_t getHarmony() const;
+	void setHarmony(const uint8_t harmonyValue);
+	void addHarmony(const uint8_t harmonyValue);
+	void removeHarmony(const uint8_t harmonyValue);
+	void sendSereneProtocol() const;
+	bool isSerene() const;
+	void setSerene(const bool isSerene);
+	uint64_t getSereneCooldown();
+	void setSereneCooldown(const uint64_t addTime);
+	void sendVirtueProtocol() const;
+	void setVirtue(const VirtueMonk_t virtue);
+	VirtueMonk_t getVirtue() const;
+	uint16_t getMantraTotal() const;
+
+	std::unordered_map<uint16_t, uint8_t> spellActivedAimMap;
+
 private:
 	friend class PlayerLock;
 	std::mutex mutex;
@@ -1486,7 +1518,8 @@ private:
 
 	std::vector<uint16_t> quickLootListItemIds;
 
-	std::vector<OutfitEntry> outfits;
+	std::vector<OutfitEntry> outfitsMap;
+	std::unordered_set<uint16_t> mountsMap;
 	std::vector<FamiliarEntry> familiars;
 
 	std::vector<std::unique_ptr<PreySlot>> preys;
@@ -1627,6 +1660,10 @@ private:
 	// Bestiary
 	bool charmExpansion = false;
 
+	// outfits and mounts
+	bool mountsModified = false;
+	bool outfitsModified = false;
+
 	std::array<CharmInfo, magic_enum::enum_count<charmRune_t>() + 1> charmsArray = {};
 	uint32_t charmPoints = 0;
 	uint32_t minorCharmEchoes = 0;
@@ -1716,16 +1753,17 @@ private:
 	uint16_t getLookCorpse() const override;
 	void getPathSearchParams(const std::shared_ptr<Creature> &creature, FindPathParams &fpp) override;
 
-	void setDead(bool isDead) {
-		m_isDead = isDead;
-	}
-	bool isDead() const override {
-		return m_isDead;
-	}
+	void setDead(bool isDead);
+	bool isDead() const override;
 
 	void triggerMomentum();
 	void clearCooldowns();
-	void triggerTranscendance();
+	void triggerTranscendence();
+
+	uint8_t m_harmony = 0;
+	bool m_serene = false;
+	uint64_t m_serene_cooldown = 0;
+	VirtueMonk_t m_virtue = VIRTUE_NONE;
 
 	friend class Game;
 	friend class SaveManager;
@@ -1791,4 +1829,6 @@ private:
 	// unequipping the armor does not influence the boot's imbuement.
 	// When present simultaneously, the one with the greatest chance of occurrence will prevail.
 	std::vector<DeflectCondition> deflectConditions;
+
+	int16_t getMantraAbsorbPercent(int16_t mantraAbsorbValue) const;
 };

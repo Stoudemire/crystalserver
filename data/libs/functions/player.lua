@@ -266,6 +266,10 @@ function Player.isMage(self)
 	return table.contains({ VOCATION.ID.SORCERER, VOCATION.ID.MASTER_SORCERER, VOCATION.ID.DRUID, VOCATION.ID.ELDER_DRUID }, self:getVocation():getId())
 end
 
+function Player.isMonk(self)
+	return table.contains({ VOCATION.ID.MONK, VOCATION.ID.EXALTED_MONK }, self:getVocation():getId())
+end
+
 local ACCOUNT_STORAGES = {}
 function Player.getAccountStorage(self, key, forceUpdate)
 	local accountId = self:getAccountId()
@@ -342,12 +346,15 @@ function Player:CreateFamiliarSpell(spellId)
 		reduction = (reduction > summonDuration and summonDuration) or reduction
 		cooldown = cooldown - reduction * 60
 	end
-	condition:setTicks(1000 * cooldown / configManager.getFloat(configKeys.RATE_SPELL_COOLDOWN))
-	self:addCondition(condition)
 
-	self:createFamiliar(familiarName, summonDuration)
+	local createdSuccessfully = self:createFamiliar(familiarName, summonDuration)
+	if createdSuccessfully then
+		condition:setTicks(1000 * cooldown / configManager.getFloat(configKeys.RATE_SPELL_COOLDOWN))
+		self:addCondition(condition)
+		return true
+	end
 
-	return true
+	return false
 end
 
 function Player:createFamiliar(familiarName, timeLeft)
@@ -919,6 +926,7 @@ local emojiMap = {
 	["paladin"] = ":bow_and_arrow:",
 	["druid"] = ":herb:",
 	["sorcerer"] = ":crystal_ball:",
+	["monk"] = ":punch:",
 }
 
 function Player.getMarkdownLink(self)

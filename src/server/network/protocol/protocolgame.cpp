@@ -230,6 +230,10 @@ namespace {
 		}
 
 		for (size_t i = 0; i < COMBAT_COUNT; ++i) {
+			if (indexToCombatType(i) == COMBAT_NEUTRALDAMAGE) {
+				continue;
+			}
+
 			damageModifiers[i] -= 100 * player->getAbsorbPercent(indexToCombatType(i));
 			if (g_configManager().getBoolean(TOGGLE_WHEELSYSTEM)) {
 				damageModifiers[i] -= player->wheel()->getResistance(indexToCombatType(i));
@@ -552,34 +556,29 @@ void ProtocolGame::login(const std::string &name, uint32_t accountId, OperatingS
 	g_logger().debug("Player logging in in version '{}' and oldProtocol '{}'", getVersion(), oldProtocol);
 
 	// dispatcher thread
-	std::shared_ptr<Player> foundPlayer = g_game().getPlayerUniqueLogin(name);
+	std::shared_ptr<Player> foundPlayer = g_game().getPlayerByName(name);
 	if (!foundPlayer) {
 		player = std::make_shared<Player>(getThis());
 		player->setName(name);
-		g_game().addPlayerUniqueLogin(player);
 
 		player->setID();
 
 		if (!IOLoginDataLoad::preLoadPlayer(player, name)) {
-			g_game().removePlayerUniqueLogin(player);
 			disconnectClient("Your character could not be loaded.");
 			return;
 		}
 
 		if (IOBan::isPlayerNamelocked(player->getGUID())) {
-			g_game().removePlayerUniqueLogin(player);
 			disconnectClient("Your character has been namelocked.");
 			return;
 		}
 
 		if (g_game().getGameState() == GAME_STATE_CLOSING && !player->hasFlag(PlayerFlags_t::CanAlwaysLogin)) {
-			g_game().removePlayerUniqueLogin(player);
 			disconnectClient("The game is just going down.\nPlease try again later.");
 			return;
 		}
 
 		if (g_game().getGameState() == GAME_STATE_CLOSED && !player->hasFlag(PlayerFlags_t::CanAlwaysLogin)) {
-			g_game().removePlayerUniqueLogin(player);
 			auto maintainMessage = g_configManager().getString(MAINTAIN_MODE_MESSAGE);
 			if (!maintainMessage.empty()) {
 				disconnectClient(maintainMessage);
@@ -589,8 +588,20 @@ void ProtocolGame::login(const std::string &name, uint32_t accountId, OperatingS
 			return;
 		}
 
+		bool maxClientsByIP = g_configManager().getBoolean(TOGGLE_MAX_CONNECTIONS_BY_IP);
+		if (maxClientsByIP && !player->hasFlag(PlayerFlags_t::CanAlwaysLogin)) {
+			uint32_t ip = player->getIP();
+			std::vector<std::shared_ptr<Player>> playersByIP = g_game().getPlayersByIP(ip);
+			uint32_t maxConnections = static_cast<uint32_t>(g_configManager().getNumber(MAX_IP_CONNECTIONS));
+			if ((playersByIP.size() + 1) > maxConnections) {
+				std::stringstream maxConnectMsg;
+				maxConnectMsg << "You have been disconnected. The maximum number of connections allowed per IP is " << maxConnections << ".";
+				disconnectClient(maxConnectMsg.str().c_str());
+				return;
+			}
+		}
+
 		if (g_configManager().getBoolean(ONLY_PREMIUM_ACCOUNT) && !player->isPremium() && (player->getGroup()->id < GROUP_TYPE_GAMEMASTER || player->getAccountType() < ACCOUNT_TYPE_GAMEMASTER)) {
-			g_game().removePlayerUniqueLogin(player);
 			disconnectClient("Your premium time for this account is out.\n\nTo play please buy additional premium time from our website");
 			return;
 		}
@@ -598,7 +609,6 @@ void ProtocolGame::login(const std::string &name, uint32_t accountId, OperatingS
 		auto onlineCount = g_game().getPlayersByAccount(player->getAccount()).size();
 		auto maxOnline = g_configManager().getNumber(MAX_PLAYERS_PER_ACCOUNT);
 		if (player->getAccountType() < ACCOUNT_TYPE_GAMEMASTER && onlineCount >= maxOnline) {
-			g_game().removePlayerUniqueLogin(player);
 			disconnectClient(fmt::format("You may only login with {} character{}\nof your account at the same time.", maxOnline, maxOnline > 1 ? "s" : ""));
 			return;
 		}
@@ -618,7 +628,7 @@ void ProtocolGame::login(const std::string &name, uint32_t accountId, OperatingS
 					ss << "Your account has been permanently banned by " << banInfo.bannedBy << ".\n\nReason specified:\n"
 					   << banInfo.reason;
 				}
-				g_game().removePlayerUniqueLogin(player);
+
 				disconnectClient(ss.str());
 				return;
 			}
@@ -639,12 +649,10 @@ void ProtocolGame::login(const std::string &name, uint32_t accountId, OperatingS
 			output->addByte(retryTime);
 			send(output);
 			disconnect();
-			g_game().removePlayerUniqueLogin(player);
 			return;
 		}
 
 		if (!IOLoginData::loadPlayerById(player, player->getGUID(), false)) {
-			g_game().removePlayerUniqueLogin(player);
 			disconnectClient("Your character could not be loaded.");
 			g_logger().warn("Player {} could not be loaded", player->getName());
 			return;
@@ -664,14 +672,12 @@ void ProtocolGame::login(const std::string &name, uint32_t accountId, OperatingS
 				}
 			}
 			if (countOutsizePZ >= maxOutsizePZ) {
-				g_game().removePlayerUniqueLogin(player);
 				disconnectClient(fmt::format("You can only have {} character{} from your account outside of a protection zone.", maxOutsizePZ == 1 ? "one" : std::to_string(maxOutsizePZ), maxOutsizePZ > 1 ? "s" : ""));
 				return;
 			}
 		}
 
 		if (!g_game().placeCreature(player, player->getLoginPosition()) && !g_game().placeCreature(player, player->getTemplePosition(), false, true)) {
-			g_game().removePlayerUniqueLogin(player);
 			disconnectClient("Temple position is wrong. Please, contact the administrator.");
 			g_logger().warn("Player {} temple position is wrong", player->getName());
 			return;
@@ -707,7 +713,7 @@ void ProtocolGame::login(const std::string &name, uint32_t accountId, OperatingS
 void ProtocolGame::connect(const std::string &playerName, OperatingSystem_t operatingSystem) {
 	eventConnect = 0;
 
-	std::shared_ptr<Player> foundPlayer = g_game().getPlayerUniqueLogin(playerName);
+	std::shared_ptr<Player> foundPlayer = g_game().getPlayerByName(playerName);
 	if (!foundPlayer) {
 		disconnectClient("You are already logged in.");
 		return;
@@ -720,7 +726,6 @@ void ProtocolGame::connect(const std::string &playerName, OperatingSystem_t oper
 	}
 
 	player = foundPlayer;
-	g_game().addPlayerUniqueLogin(player);
 
 	g_chat().removeUserFromAllChannels(player);
 	player->clearModalWindows();
@@ -853,14 +858,20 @@ void ProtocolGame::onRecvFirstMessage(NetworkMessage &msg) {
 
 	std::string characterName = msg.getString();
 
-	std::shared_ptr<Player> foundPlayer = g_game().getPlayerUniqueLogin(characterName);
+	const auto &onlinePlayer = g_game().getPlayerByName(characterName);
+	const auto &foundPlayer = !onlinePlayer ? g_game().getDeadPlayer(characterName) : onlinePlayer;
 	if (foundPlayer && foundPlayer->client) {
-		if (foundPlayer->getProtocolVersion() != getVersion() && foundPlayer->isOldProtocol() != oldProtocol) {
-			disconnectClient(fmt::format("You are already logged in using protocol '{}'. Please log out from the other session to connect here.", foundPlayer->getProtocolVersion()));
+		if (foundPlayer->isDead()) {
+			disconnectClient("You are already logged in.");
 			return;
 		}
 
-		foundPlayer->client->disconnectClient("You are already connected through another client. Please use only one client at a time!");
+		auto message = fmt::format("You are already connected through another client. Please use only one client at a time!");
+		if (foundPlayer->getProtocolVersion() != getVersion() && foundPlayer->isOldProtocol() != oldProtocol) {
+			message = fmt::format("You are already logged in using protocol '{}'. Please log out from the other session to connect here.", foundPlayer->getProtocolVersion());
+		}
+
+		foundPlayer->client->disconnectClient(message);
 	}
 
 	auto timeStamp = msg.get<uint32_t>();
@@ -1010,9 +1021,6 @@ void ProtocolGame::parsePacket(NetworkMessage &msg) {
 void ProtocolGame::parsePacketDead(uint8_t recvbyte) {
 	if (recvbyte == 0x14) {
 		// Remove player from game if click "ok" using otc
-		if (player && isOTC) {
-			g_game().removePlayerUniqueLogin(player->getName());
-		}
 		disconnect();
 		return;
 	}
@@ -1327,6 +1335,9 @@ void ProtocolGame::parsePacketFromDispatcher(NetworkMessage &msg, uint8_t recvby
 			break;
 		case 0xC0:
 			parseForgeBrowseHistory(msg);
+			break;
+		case 0xC8:
+			parseSelectSpellAimProtocol(msg);
 			break;
 		case 0xC9: /* update tile */
 			break;
@@ -2286,7 +2297,7 @@ void ProtocolGame::sendHighscoresNoData() {
 	writeToOutputBuffer(msg);
 }
 
-void ProtocolGame::sendHighscores(const std::vector<HighscoreCharacter> &characters, uint8_t categoryId, uint32_t vocationId, uint16_t page, uint16_t pages, uint32_t updateTimer) {
+void ProtocolGame::sendHighscores(const std::vector<HighscoreCharacter> &characters, uint8_t categoryId, uint32_t vocationBaseId, uint16_t page, uint16_t pages, uint32_t updateTimer) {
 	if (oldProtocol) {
 		return;
 	}
@@ -2312,14 +2323,14 @@ void ProtocolGame::sendHighscores(const std::vector<HighscoreCharacter> &charact
 
 	uint32_t selectedVocation = 0xFFFFFFFF;
 	const auto vocationsMap = g_vocations().getVocations();
-	for (const auto &it : vocationsMap) {
-		const auto &vocation = it.second;
-		if (vocation->getFromVocation() == static_cast<uint32_t>(vocation->getId())) {
-			msg.add<uint32_t>(vocation->getFromVocation()); // Vocation Id
-			msg.addString(vocation->getVocName()); // Vocation Name
+	for (const auto &[currentVocationId, vocationPtr] : vocationsMap) {
+		const uint32_t currentVocationBaseId = vocationPtr->getBaseId();
+		if (vocationPtr->getFromVocation() == static_cast<uint32_t>(currentVocationId)) {
+			msg.add<uint32_t>(currentVocationBaseId); // Vocation Id
+			msg.addString(vocationPtr->getVocName()); // Vocation Name
 			++vocations;
-			if (vocation->getFromVocation() == vocationId) {
-				selectedVocation = vocationId;
+			if (currentVocationBaseId == vocationBaseId) {
+				selectedVocation = vocationBaseId;
 			}
 		}
 	}
@@ -3630,7 +3641,11 @@ void ProtocolGame::sendCyclopediaCharacterGeneralStats() {
 	msg.add<uint32_t>(std::min<int32_t>(player->getMana(), std::numeric_limits<uint16_t>::max()));
 	msg.add<uint32_t>(std::min<int32_t>(player->getMaxMana(), std::numeric_limits<uint16_t>::max()));
 	msg.addByte(player->getSoul());
-	msg.add<uint16_t>(player->getStaminaMinutes());
+	if (g_configManager().getBoolean(STAMINA_SYSTEM)) {
+		msg.add<uint16_t>(player->getStaminaMinutes());
+	} else {
+		msg.add<uint16_t>(0x9D8);
+	}
 
 	std::shared_ptr<Condition> condition = player->getCondition(CONDITION_REGENERATION, CONDITIONID_DEFAULT);
 	msg.add<uint16_t>(condition ? condition->getTicks() / 1000 : 0x00);
@@ -4404,12 +4419,14 @@ void ProtocolGame::sendCyclopediaCharacterDefenceStats() {
 	msg.addByte(CYCLOPEDIA_CHARACTERINFO_DEFENCESTATS);
 	msg.addByte(0x00); // 0x00 Here means 'no error'
 
-	const double dodgeTotal = getForgeSkillStat(CONST_SLOT_ARMOR) + player->wheel()->getStat(WheelStat_t::DODGE);
+	const double dodgeWheel = player->wheel()->getStat(WheelStat_t::DODGE) / 10000.0;
+	const double dodgeTotal = getForgeSkillStat(CONST_SLOT_ARMOR) + dodgeWheel;
+
 	msg.addDouble(dodgeTotal);
 	msg.addDouble(getForgeSkillStat(CONST_SLOT_ARMOR, false));
 	msg.addDouble(getForgeSkillStat(CONST_SLOT_ARMOR) - getForgeSkillStat(CONST_SLOT_ARMOR, false));
 	msg.addDouble(0.00);
-	msg.addDouble(player->wheel()->getStat(WheelStat_t::DODGE));
+	msg.addDouble(dodgeWheel);
 
 	msg.add<uint32_t>(player->getMagicShieldCapacityFlat() * (1 + player->getMagicShieldCapacityPercent()));
 	msg.add<uint16_t>(static_cast<uint16_t>(player->getMagicShieldCapacityFlat())); // Direct bonus
@@ -4418,6 +4435,7 @@ void ProtocolGame::sendCyclopediaCharacterDefenceStats() {
 	msg.add<uint16_t>(static_cast<uint16_t>(player->getReflectFlat(COMBAT_PHYSICALDAMAGE)));
 
 	msg.add<uint16_t>(player->getArmor());
+	msg.add<uint16_t>(player->getMantraTotal());
 
 	const auto shieldingSkill = player->getSkillLevel(SKILL_SHIELD);
 	const uint16_t defenseWheel = player->wheel()->getMajorStatConditional("Combat Mastery", WheelMajor_t::DEFENSE);
@@ -6209,6 +6227,10 @@ void ProtocolGame::sendMarketDetail(uint16_t itemId, uint8_t tier) {
 		}
 
 		for (uint8_t i = SKILL_CRITICAL_HIT_CHANCE; i <= SKILL_LAST; i++) {
+			if (i == SKILL_MANA_LEECH_CHANCE || i == SKILL_LIFE_LEECH_CHANCE) {
+				continue;
+			}
+
 			auto skills = it.abilities->skills[i];
 			if (!skills) {
 				continue;
@@ -6378,13 +6400,31 @@ void ProtocolGame::sendMarketDetail(uint16_t itemId, uint8_t tier) {
 				chance = (0.4 * tier * tier) + (1.7 * tier) + 0.4;
 				ss << fmt::format("{} ({:.2f}% Amplification)", static_cast<uint16_t>(tier), chance);
 			}
+			msg.addString(it.elementalBond);
+			if (it.mantra > 0) {
+				msg.addString(std::to_string(it.mantra));
+			} else {
+				msg.add<uint16_t>(0x00); // no mantra
+			}
 			msg.addString(ss.str());
 		} else if (it.upgradeClassification > 0 && tier == 0) {
 			msg.addString(std::to_string(it.upgradeClassification));
+			msg.addString(it.elementalBond);
+			if (it.mantra > 0) {
+				msg.addString(std::to_string(it.mantra));
+			} else {
+				msg.add<uint16_t>(0x00); // no mantra
+			}
 			msg.addString(std::to_string(tier));
 		} else {
-			msg.add<uint16_t>(0x00);
-			msg.add<uint16_t>(0x00);
+			msg.add<uint16_t>(0x00); // no classification
+			msg.addString(it.elementalBond);
+			if (it.mantra > 0) {
+				msg.addString(std::to_string(it.mantra));
+			} else {
+				msg.add<uint16_t>(0x00); // no mantra
+			}
+			msg.add<uint16_t>(0x00); // no tier
 		}
 	}
 
@@ -7284,7 +7324,7 @@ void ProtocolGame::sendInventoryIds() {
 	for (uint16_t i = 1; i <= 11; i++) {
 		msg.add<uint16_t>(i);
 		msg.addByte(0x00);
-		msg.add<uint16_t>(0x01);
+		msg.addByte(0x01);
 	}
 
 	uint16_t totalItemsCount = 0;
@@ -7292,7 +7332,17 @@ void ProtocolGame::sendInventoryIds() {
 		for (const auto [tier, count] : item) {
 			msg.add<uint16_t>(itemId);
 			msg.addByte(tier);
-			msg.add<uint16_t>(static_cast<uint16_t>(count));
+			if (count < 0x40) {
+				msg.addByte(count);
+			} else if (count < 0x4000) {
+				msg.addByte((count >> 8) + 64);
+				msg.addByte(count & 0xFF);
+			} else {
+				msg.addByte(0x80);
+				msg.addByte((count >> 16) & 0xFF);
+				msg.addByte((count >> 8) & 0xFF);
+				msg.addByte(count & 0xFF);
+			}
 			totalItemsCount++;
 		}
 	}
@@ -8137,7 +8187,11 @@ void ProtocolGame::AddPlayerStats(NetworkMessage &msg) {
 
 	msg.addByte(player->getSoul());
 
-	msg.add<uint16_t>(player->getStaminaMinutes());
+	if (g_configManager().getBoolean(STAMINA_SYSTEM)) {
+		msg.add<uint16_t>(player->getStaminaMinutes());
+	} else {
+		msg.add<uint16_t>(0x9D8);
+	}
 
 	msg.add<uint16_t>(player->getBaseSpeed());
 
@@ -8275,6 +8329,7 @@ void ProtocolGame::AddPlayerSkills(NetworkMessage &msg) {
 
 	msg.add<uint16_t>(player->getDefense(true));
 	msg.add<uint16_t>(player->getArmor());
+	msg.add<uint16_t>(player->getMantraTotal());
 	msg.addDouble(player->getMitigation() / 100.); // Mitigation
 	msg.addDouble(getForgeSkillStat(CONST_SLOT_ARMOR)); // Dodge (Ruse)
 	msg.add<uint16_t>(static_cast<uint16_t>(player->getReflectFlat(COMBAT_PHYSICALDAMAGE))); // Damage Reflection
@@ -9910,4 +9965,54 @@ void ProtocolGame::sendHousesInfo() {
 	}
 
 	writeToOutputBuffer(msg);
+}
+
+void ProtocolGame::sendHarmonyProtocol(const uint8_t harmonyValue) {
+	NetworkMessage msg;
+	msg.addByte(0xC1);
+	msg.addByte(0x00);
+	msg.addByte(harmonyValue);
+	writeToOutputBuffer(msg);
+}
+
+void ProtocolGame::sendSereneProtocol(const bool isSerene) {
+	NetworkMessage msg;
+	msg.addByte(0xC1);
+	msg.addByte(0x01);
+	msg.addByte(isSerene ? 0x01 : 0x00);
+	writeToOutputBuffer(msg);
+}
+
+void ProtocolGame::sendVirtueProtocol(const uint8_t virtueValue) {
+	NetworkMessage msg;
+	msg.addByte(0xC1);
+	msg.addByte(0x02);
+	switch (virtueValue) {
+		case 1:
+			msg.addByte(0x01); // Virtue of Harmony
+			break;
+		case 2:
+			msg.addByte(0x02); // Virtue of Justice
+			break;
+		case 3:
+			msg.addByte(0x03); // Virtue of Sustain
+			break;
+	}
+	writeToOutputBuffer(msg);
+}
+
+void ProtocolGame::parseSelectSpellAimProtocol(NetworkMessage &msg) {
+	if (!player->canDoExAction()) {
+		player->sendCancelMessage("You need to wait to do this again.");
+		return;
+	}
+
+	const uint8_t spellListSize = msg.getByte();
+	for (auto i = 1; i <= spellListSize; i++) {
+		const uint16_t spellId = msg.get<uint16_t>();
+		const uint8_t spellAim = msg.getByte();
+		player->spellActivedAimMap[spellId] = spellAim;
+	}
+
+	player->setNextExAction(OTSYS_TIME() + g_configManager().getNumber(UI_ACTIONS_DELAY_INTERVAL) - 10);
 }

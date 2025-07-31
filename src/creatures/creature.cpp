@@ -1128,6 +1128,9 @@ void Creature::onTickCondition(ConditionType_t type, bool &bRemove) {
 		case CONDITION_BLEEDING:
 			bRemove = (field->getCombatType() != COMBAT_PHYSICALDAMAGE);
 			break;
+		case CONDITION_AGONY:
+			bRemove = (field->getCombatType() != COMBAT_AGONYDAMAGE);
+			break;
 		default:
 			break;
 	}
@@ -1375,6 +1378,7 @@ std::vector<std::shared_ptr<Condition>> Creature::getCleansableConditions() cons
 			case CONDITION_PARALYZE:
 			case CONDITION_ROOTED:
 			case CONDITION_FEARED:
+			case CONDITION_AGONY:
 				cleansableConditions.emplace_back(condition);
 				break;
 
@@ -1439,8 +1443,8 @@ uint16_t Creature::getStepDuration(Direction dir) {
 	}
 
 	if (walk.needRecache()) {
-		walk.duration = static_cast<uint16_t>(std::round(walk.calculatedStepSpeed / SERVER_BEAT) * SERVER_BEAT);
-		walk.duration = std::max<uint16_t>(50, walk.duration);
+		auto duration = std::floor(1000 * walk.groundSpeed / walk.calculatedStepSpeed);
+		walk.duration = static_cast<uint16_t>(std::ceil(duration / SERVER_BEAT) * SERVER_BEAT);
 	}
 
 	auto duration = walk.duration;
@@ -1576,7 +1580,7 @@ void Creature::setParent(std::weak_ptr<Cylinder> cylinder) {
 	}
 
 	if (walk.groundSpeed != oldGroundSpeed) {
-		updateCalculatedStepSpeed();
+		walk.recache();
 	}
 }
 

@@ -181,11 +181,13 @@ bool ConfigManager::load() {
 	loadBoolConfig(L, UNLOCK_ALL_FAMILIARS, "unlockAllFamiliars", false);
 	loadBoolConfig(L, LEAVE_PARTY_ON_DEATH, "leavePartyOnDeath", false);
 	loadBoolConfig(L, TOGGLE_SPECIAL_TILES, "toggleSpecialTiles", false);
+	loadBoolConfig(L, TOGGLE_MAX_CONNECTIONS_BY_IP, "toggleMaxConnectionsByIP", false);
 
 	loadFloatConfig(L, BESTIARY_RATE_CHARM_SHOP_PRICE, "bestiaryRateCharmShopPrice", 1.0);
 	loadFloatConfig(L, COMBAT_CHAIN_SKILL_FORMULA_AXE, "combatChainSkillFormulaAxe", 0.9);
 	loadFloatConfig(L, COMBAT_CHAIN_SKILL_FORMULA_CLUB, "combatChainSkillFormulaClub", 0.7);
 	loadFloatConfig(L, COMBAT_CHAIN_SKILL_FORMULA_SWORD, "combatChainSkillFormulaSword", 1.1);
+	loadFloatConfig(L, COMBAT_CHAIN_SKILL_FORMULA_FIST, "combatChainSkillFormulaFist", 1.0);
 	loadFloatConfig(L, FORGE_AMOUNT_MULTIPLIER, "forgeAmountMultiplier", 3.0);
 	loadFloatConfig(L, HAZARD_EXP_BONUS_MULTIPLIER, "hazardExpBonusMultiplier", 2.0);
 	loadFloatConfig(L, LOYALTY_BONUS_PERCENTAGE_MULTIPLIER, "loyaltyBonusPercentageMultiplier", 1.0);
@@ -218,9 +220,9 @@ bool ConfigManager::load() {
 	loadFloatConfig(L, RUSE_CHANCE_FORMULA_A, "ruseChanceFormulaA", 0.0307576);
 	loadFloatConfig(L, RUSE_CHANCE_FORMULA_B, "ruseChanceFormulaB", 0.440697);
 	loadFloatConfig(L, RUSE_CHANCE_FORMULA_C, "ruseChanceFormulaC", 0.026);
-	loadFloatConfig(L, TRANSCENDANCE_CHANCE_FORMULA_A, "transcendanceChanceFormulaA", 0.0127);
-	loadFloatConfig(L, TRANSCENDANCE_CHANCE_FORMULA_B, "transcendanceChanceFormulaB", 0.1070);
-	loadFloatConfig(L, TRANSCENDANCE_CHANCE_FORMULA_C, "transcendanceChanceFormulaC", 0.0073);
+	loadFloatConfig(L, TRANSCENDENCE_CHANCE_FORMULA_A, "transcendenceChanceFormulaA", 0.0127);
+	loadFloatConfig(L, TRANSCENDENCE_CHANCE_FORMULA_B, "transcendenceChanceFormulaB", 0.1070);
+	loadFloatConfig(L, TRANSCENDENCE_CHANCE_FORMULA_C, "transcendenceChanceFormulaC", 0.0073);
 	loadFloatConfig(L, COMBAT_CHAIN_SKILL_FORMULA_DISTANCE, "combatChainSkillFormulaDistance", 0.9);
 	loadFloatConfig(L, COMBAT_CHAIN_SKILL_FORMULA_MISSILE, "combatChainSkillFormulaMissile", 0.9);
 	loadFloatConfig(L, COMBAT_CHAIN_SKILL_FORMULA_WANDS_AND_RODS, "combatChainSkillFormulaWandsAndRods", 1.0);
@@ -252,7 +254,6 @@ bool ConfigManager::load() {
 	loadIntConfig(L, DEFAULT_RESPAWN_TIME, "defaultRespawnTime", 60);
 	loadIntConfig(L, DEFAULT_DESPAWNRADIUS, "deSpawnRadius", 50);
 	loadIntConfig(L, DEFAULT_DESPAWNRANGE, "deSpawnRange", 2);
-	loadIntConfig(L, DEPOTCHEST, "depotChest", 4);
 	loadIntConfig(L, DISCORD_WEBHOOK_DELAY_MS, "discordWebhookDelayMs", Webhook::DEFAULT_DELAY_MS);
 	loadIntConfig(L, EX_ACTIONS_DELAY_INTERVAL, "timeBetweenExActions", 1000);
 	loadIntConfig(L, EXP_FROM_PLAYERS_LEVEL_RANGE, "expFromPlayersLevelRange", 75);
@@ -357,7 +358,7 @@ bool ConfigManager::load() {
 	loadIntConfig(L, TASK_HUNTING_SELECTION_LIST_PRICE, "taskHuntingSelectListPrice", 5);
 	loadIntConfig(L, TIBIADROME_CONCOCTION_COOLDOWN, "tibiadromeConcoctionCooldown", 24 * 60 * 60);
 	loadIntConfig(L, TIBIADROME_CONCOCTION_DURATION, "tibiadromeConcoctionDuration", 1 * 60 * 60);
-	loadIntConfig(L, TRANSCENDANCE_AVATAR_DURATION, "transcendanceAvatarDuration", 7000);
+	loadIntConfig(L, TRANSCENDENCE_AVATAR_DURATION, "transcendenceAvatarDuration", 7000);
 	loadIntConfig(L, VIP_BONUS_EXP, "vipBonusExp", 0);
 	loadIntConfig(L, VIP_BONUS_LOOT, "vipBonusLoot", 0);
 	loadIntConfig(L, VIP_BONUS_SKILL, "vipBonusSkill", 0);
@@ -401,6 +402,8 @@ bool ConfigManager::load() {
 	loadIntConfig(L, MARKET_ACTIONS_DELAY_INTERVAL, "marketActionsDelay", 1000);
 	loadIntConfig(L, IMBUEMENT_ACTIONS_DELAY_INTERVAL, "imbueActionsDelay", 1000);
 	loadIntConfig(L, EXPERIENCE_SHARE_ACTIVITY, "experienceShareActivity", 2 * 60 * 1000);
+	loadIntConfig(L, MAX_IP_CONNECTIONS, "maxIPConnections", 4);
+	loadIntConfig(L, STASH_MANAGE_AMOUNT, "stashManageAmount", 100000);
 
 	loadStringConfig(L, CORE_DIRECTORY, "coreDirectory", "data");
 	loadStringConfig(L, DATA_DIRECTORY, "dataPackDirectory", "data-global");

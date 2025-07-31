@@ -47,6 +47,7 @@ enum PlayerSex_t : uint8_t;
 #ifndef USE_PRECOMPILED_HEADERS
 	#include <random>
 #endif
+#include <ctime>
 
 void printXMLError(const std::string &where, const std::string &fileName, const pugi::xml_parse_result &result);
 
@@ -225,3 +226,5 @@ float calculateEquipmentLoss(uint8_t blessingAmount, bool isContainer = false);
 uint8_t calculateMaxPvpReduction(uint8_t blessCount, bool isPromoted = false);
 
 std::string convertToUTF8(const std::string &input);
+
+extern const std::unordered_set<std::string_view> harmonySpells;

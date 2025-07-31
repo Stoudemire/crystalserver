@@ -30,7 +30,7 @@ static constexpr int32_t CHANNEL_PARTY = 0x01;
 static constexpr int32_t CHANNEL_PRIVATE = 0xFFFF;
 
 // This is in miliseconds
-static constexpr int32_t EVENT_IMBUEMENT_INTERVAL = 1000;
+static constexpr int32_t EVENT_IMBUEMENT_AND_SERENE_STATUS_INTERVAL = 1000;
 static constexpr uint8_t IMBUEMENT_MAX_TIER = 3;
 
 static constexpr int32_t STORAGEVALUE_PODIUM = 30020;
@@ -50,13 +50,7 @@ static constexpr int32_t SWIMMING_OUTFIT = 267;
 // [10000000 - 20000000];
 static constexpr int32_t PSTRG_RESERVED_RANGE_START = 10000000;
 static constexpr int32_t PSTRG_RESERVED_RANGE_SIZE = 10000000;
-// [1000 - 1500];
-static constexpr int32_t PSTRG_OUTFITS_RANGE_START = (PSTRG_RESERVED_RANGE_START + 1000);
-static constexpr int32_t PSTRG_OUTFITS_RANGE_SIZE = 500;
-// [2001 - 2011];
-static constexpr int32_t PSTRG_MOUNTS_RANGE_START = (PSTRG_RESERVED_RANGE_START + 2001);
-static constexpr int32_t PSTRG_MOUNTS_RANGE_SIZE = 10;
-static constexpr int32_t PSTRG_MOUNTS_CURRENTMOUNT = (PSTRG_MOUNTS_RANGE_START + 10);
+
 // [3000 - 3500];
 static constexpr int32_t PSTRG_FAMILIARS_RANGE_START = (PSTRG_RESERVED_RANGE_START + 3000);
 static constexpr int32_t PSTRG_FAMILIARS_RANGE_SIZE = 500;
