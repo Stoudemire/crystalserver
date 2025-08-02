@@ -11856,8 +11856,10 @@ bool Player::isFirstOnStack() const {
 }
 
 void Player::addScheduledUpdates(uint32_t flags) {
+	bool shouldSchedule = !scheduledUpdate;
 	scheduledUpdates |= flags;
-	if (!scheduledUpdate) {
+
+	if (shouldSchedule) {
 		g_dispatcher().addEvent(
 			[playerId = getID()]() { g_game().updatePlayerEvent(playerId); },
 			__FUNCTION__,
