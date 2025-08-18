@@ -943,47 +943,10 @@ void WeaponWand::configureWeapon(const ItemType &it) {
 }
 
 int32_t WeaponWand::getWeaponDamage(const std::shared_ptr<Player> &player, const std::shared_ptr<Creature> &, const std::shared_ptr<Item> &, bool maxDamage /* = false*/) const {
-	if (!player->checkChainSystem()) {
-		float multiplier = 1.0f;
-		auto vocation = player->getVocation();
-		if (vocation) {
-			multiplier = vocation->wandRodDamageMultiplier;
-		}
-
-		auto maxValue = static_cast<int32_t>(maxChange * multiplier);
-
-		// Returns maximum damage or a random value between minChange and maxChange
-		return maxDamage ? -maxValue : -normal_random(minChange, maxValue);
+	if (maxDamage) {
+		return -maxChange;
 	}
-
-	if (!g_configManager().getBoolean(CHAIN_SYSTEM_MODIFY_MAGIC)) {
-		return maxDamage ? -maxChange : -normal_random(minChange, maxChange);
-	}
-
-	// If chain system is enabled, calculates magic-based damage
-	int32_t attackSkill = 0;
-	int32_t attackValue = 0;
-	float attackFactor = 0.0;
-	[[maybe_unused]] int16_t elementAttack = 0;
-	[[maybe_unused]] CombatDamage combatDamage;
-	calculateSkillFormula(player, attackSkill, attackValue, attackFactor, elementAttack, combatDamage);
-
-	const auto magLevel = player->getMagicLevel();
-	const auto level = player->getLevel();
-
-	// Check if level is greater than zero before performing division
-	const auto levelDivision = level > 0 ? level / 5.0 : 0.0;
-
-	const auto totalAttackValue = magLevel + attackValue;
-
-	// Check if magLevel is greater than zero before performing division
-	const auto magicLevelDivision = totalAttackValue > 0 ? totalAttackValue / 3.0 : 0.0;
-
-	const double min = levelDivision + magicLevelDivision;
-	const double max = levelDivision + totalAttackValue;
-
-	// Returns the calculated maximum damage or a random value between the calculated minimum and maximum
-	return maxDamage ? -max : -normal_random(min, max);
+	return -normal_random(minChange, maxChange);
 }
 
 int16_t WeaponWand::getElementDamageValue() const {
