@@ -101,7 +101,7 @@ encounter
 				Position(31970, 32320, 10),
 				Position(31970, 32330, 10),
 			},
-		}
+		},
 	})
 	:autoAdvance("30s")
 

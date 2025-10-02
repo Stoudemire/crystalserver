@@ -9,7 +9,7 @@ local function applyStorageToPlayers(position)
 		if player:isPlayer() then
 			player:setStorageValue(storageValue, 1)
 
-            -- Reset the storage value after the specified time
+			-- Reset the storage value after the specified time
 			addEvent(function()
 				player:setStorageValue(storageValue, -1)
 			end, resetTime * 1000)
