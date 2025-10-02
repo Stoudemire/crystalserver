@@ -15,6 +15,7 @@ monster.outfit = {
 
 monster.events = {
 	"FeasterOfSoulsBossDeath",
+	"DreadMaidenImmunity",
 }
 
 monster.bosstiary = {

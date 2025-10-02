@@ -7,6 +7,10 @@ monster.outfit = {
 	lookTypeEx = 32418,
 }
 
+monster.events = {
+	"BrainHeadImmunity",
+}
+
 monster.health = 75000
 monster.maxHealth = monster.health
 monster.race = "undead"
