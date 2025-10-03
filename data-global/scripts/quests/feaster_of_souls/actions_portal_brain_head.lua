@@ -53,12 +53,19 @@ zone:setRemoveDestination(config.exitPosition)
 local locked = false
 
 local function clearZoneMonsters()
-	local spectators = Game.getSpectators(Position(31963, 32324, 10), false, false, 50, 50, 10, 10)
-	for _, creature in ipairs(spectators) do
-		if creature:isMonster() then
-			creature:remove()
+	local spectators, spectator = Game.getSpectators(Position(31954, 32325, 10), false, false, 13, 13, 13, 13)
+	for i = 1, #spectators do
+		spectator = spectators[i]
+		if spectator:isMonster() then
+			spectator:getPosition():sendMagicEffect(CONST_ME_POFF)
+			spectator:remove()
+		elseif spectator:isPlayer() then
+			spectator:teleportTo(config.exitPosition, true)
+			spectator:getPosition():sendMagicEffect(CONST_ME_TELEPORT)
+			spectator:sendTextMessage(MESSAGE_EVENT_ADVANCE, "You have been teleported out of the area.")
 		end
 	end
+	return true
 end
 
 function encounter:onReset()
@@ -98,8 +105,6 @@ encounter
 				Position(31958, 32327, 10),
 				Position(31962, 32322, 10),
 				Position(31962, 32327, 10),
-				Position(31970, 32320, 10),
-				Position(31970, 32330, 10),
 			},
 		},
 	})
@@ -124,6 +129,7 @@ function teleportBoss.onStepIn(creature, item, position, fromPosition)
 	if not creature or not creature:isPlayer() then
 		return false
 	end
+
 	local player = creature
 	if player:getLevel() < config.requiredLevel then
 		player:teleportTo(config.exitPosition, true)
@@ -131,18 +137,21 @@ function teleportBoss.onStepIn(creature, item, position, fromPosition)
 		player:sendTextMessage(MESSAGE_EVENT_ADVANCE, "You need to be level " .. config.requiredLevel .. " or higher.")
 		return true
 	end
+
 	if locked then
 		player:teleportTo(config.exitPosition, true)
 		player:getPosition():sendMagicEffect(CONST_ME_TELEPORT)
 		player:sendTextMessage(MESSAGE_EVENT_ADVANCE, "There's already someone fighting with " .. config.bossName .. ".")
 		return false
 	end
+
 	if zone:countPlayers(IgnoredByMonsters) >= 5 then
 		player:teleportTo(config.exitPosition, true)
 		player:getPosition():sendMagicEffect(CONST_ME_TELEPORT)
 		player:sendTextMessage(MESSAGE_EVENT_ADVANCE, "The boss room is full.")
 		return false
 	end
+
 	local timeLeft = player:getBossCooldown(config.bossName) - os.time()
 	if timeLeft > 0 then
 		player:teleportTo(config.exitPosition, true)
@@ -152,7 +161,7 @@ function teleportBoss.onStepIn(creature, item, position, fromPosition)
 		return false
 	end
 
-	clearZoneMonsters()
+	addEvent(clearZoneMonsters, 5 * 60 * 1000)
 
 	player:teleportTo(config.destination)
 	player:getPosition():sendMagicEffect(CONST_ME_TELEPORT)

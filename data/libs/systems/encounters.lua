@@ -430,7 +430,7 @@ function Encounter:startOnEnter()
 		if self:countPlayers() == 1 then
 			return
 		end
-		self:reset()
+		-- self:reset()
 	end
 
 	zoneEvents:register()
