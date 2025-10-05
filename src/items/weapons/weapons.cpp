@@ -642,9 +642,15 @@ int32_t WeaponMelee::getWeaponDamage(const std::shared_ptr<Player> &player, cons
 	const float attackFactor = player->getAttackFactor();
 	const uint32_t level = player->getLevel();
 
-	const auto maxValue = static_cast<int32_t>(Weapons::getMaxWeaponDamage(level, attackSkill, combinedAttack, attackFactor, true) * player->getVocation()->meleeDamageMultiplier);
+	auto maxValue = static_cast<int32_t>(Weapons::getMaxWeaponDamage(level, attackSkill, combinedAttack, attackFactor, true) * player->getVocation()->meleeDamageMultiplier);
 
 	const int32_t minValue = physicalAttack > 0 ? level / 5 : 0;
+
+	// Apply reset damage bonus
+	int32_t resetDamageBonus = player->getResetDamageBonus();
+	if (resetDamageBonus > 0) {
+		maxValue += static_cast<int32_t>(maxValue * resetDamageBonus / 100.0);
+	}
 
 	if (maxDamage) {
 		return -maxValue;
@@ -907,6 +913,13 @@ int32_t WeaponDistance::getWeaponDamage(const std::shared_ptr<Player> &player, c
 
 	int32_t minValue = player->getLevel() / 5;
 	int32_t maxValue = std::round((0.09f * attackFactor) * attackSkill * attackValue + minValue);
+	
+	// Apply reset damage bonus
+	int32_t resetDamageBonus = player->getResetDamageBonus();
+	if (resetDamageBonus > 0) {
+		maxValue += static_cast<int32_t>(maxValue * resetDamageBonus / 100.0);
+	}
+	
 	if (maxDamage) {
 		return -maxValue;
 	}
@@ -972,12 +985,26 @@ int32_t WeaponWand::getWeaponDamage(const std::shared_ptr<Player> &player, const
 
 		auto maxValue = static_cast<int32_t>(maxChange * multiplier);
 
-		// Returns maximum damage or a random value between minChange and maxChange
+		// Apply reset damage bonus
+		int32_t resetDamageBonus = player->getResetDamageBonus();
+		if (resetDamageBonus > 0) {
+			maxValue += static_cast<int32_t>(maxValue * resetDamageBonus / 100.0);
+		}
+
+		// Returns maximum damage or a random value between minChange and maxValue
 		return maxDamage ? -maxValue : -normal_random(minChange, maxValue);
 	}
 
 	if (!g_configManager().getBoolean(CHAIN_SYSTEM_MODIFY_MAGIC)) {
-		return maxDamage ? -maxChange : -normal_random(minChange, maxChange);
+		int32_t maxValue = maxChange;
+		
+		// Apply reset damage bonus
+		int32_t resetDamageBonus = player->getResetDamageBonus();
+		if (resetDamageBonus > 0) {
+			maxValue += static_cast<int32_t>(maxValue * resetDamageBonus / 100.0);
+		}
+		
+		return maxDamage ? -maxValue : -normal_random(minChange, maxValue);
 	}
 
 	// If chain system is enabled, calculates magic-based damage

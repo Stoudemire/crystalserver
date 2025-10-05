@@ -409,6 +409,16 @@ public:
 
 	bool checkLoginDelay(uint32_t playerId) const;
 
+	// Reset System
+	bool canReset() const;
+	bool performReset();
+	uint32_t getResetCount() const;
+	void setResetCount(uint32_t count);
+	void addResetCount(uint32_t amount = 1);
+	int32_t getResetDamageBonus() const;
+	int32_t getResetDefenseBonus() const;
+	bool isResetSystemEnabled() const;
+
 	void setGroup(std::shared_ptr<Group> newGroup) {
 		group = std::move(newGroup);
 	}
@@ -1596,6 +1606,7 @@ private:
 
 	uint32_t level = 1;
 	uint32_t magLevel = 0;
+	uint32_t resets = 0;
 	uint32_t actionTaskEvent = 0;
 	uint32_t actionTaskEventPush = 0;
 	uint32_t actionPotionTaskEvent = 0;
@@ -1622,6 +1633,7 @@ private:
 	uint32_t coinBalance = 0;
 	uint32_t coinTransferableBalance = 0;
 	uint16_t xpBoostTime = 0;
+	uint32_t previousSpeed = 0;
 
 	bool randomMount = false;
 

@@ -183,6 +183,9 @@ bool ConfigManager::load() {
 	loadBoolConfig(L, TOGGLE_SPECIAL_TILES, "toggleSpecialTiles", false);
 	loadBoolConfig(L, TOGGLE_GUILDHALL_NEED_GUILD, "toggleGuildHallNeedGuild", true);
 	loadBoolConfig(L, TOGGLE_MAX_CONNECTIONS_BY_IP, "toggleMaxConnectionsByIP", false);
+	loadBoolConfig(L, TOGGLE_RESET_SYSTEM, "toggleResetSystem", false);
+	loadBoolConfig(L, TOGGLE_RESEET_HEALTH_MANA_BONUS, "toggleResetHealthManaBonus", false);
+	loadBoolConfig(L, TOGGLE_RESET_RESTORE_SPEED, "toggleResetRestoreSpeed", true);
 
 	loadFloatConfig(L, BESTIARY_RATE_CHARM_SHOP_PRICE, "bestiaryRateCharmShopPrice", 1.0);
 	loadFloatConfig(L, COMBAT_CHAIN_SKILL_FORMULA_AXE, "combatChainSkillFormulaAxe", 0.9);
@@ -233,6 +236,10 @@ bool ConfigManager::load() {
 	loadFloatConfig(L, AMPLIFICATION_CHANCE_FORMULA_A, "amplificationChanceFormulaA", 0.4);
 	loadFloatConfig(L, AMPLIFICATION_CHANCE_FORMULA_B, "amplificationChanceFormulaB", 1.7);
 	loadFloatConfig(L, AMPLIFICATION_CHANCE_FORMULA_C, "amplificationChanceFormulaC", 0.4);
+	loadFloatConfig(L, RESET_DAMAGE_BONUS_PER_RESET, "resetDamageBonusPerReset", 1.0);
+	loadFloatConfig(L, RESET_DEFENSE_BONUS_PER_RESET, "resetDefenseBonusPerReset", 1.0);
+	loadFloatConfig(L, RESET_BONUS_HEALTH_PERCENT, "resetBonusHealthPercent", 1.0);
+	loadFloatConfig(L, RESET_BONUS_MANA_PERCENT, "resetBonusManaPercent", 1.0);
 
 	loadIntConfig(L, ACTIONS_DELAY_INTERVAL, "timeBetweenActions", 200);
 	loadIntConfig(L, ADVENTURERSBLESSING_LEVEL, "adventurersBlessingLevel", 21);
@@ -406,6 +413,9 @@ bool ConfigManager::load() {
 	loadIntConfig(L, MAX_HOUSES_LIMIT, "maxHousesLimit", 3);
 	loadIntConfig(L, MAX_IP_CONNECTIONS, "maxIPConnections", 4);
 	loadIntConfig(L, STASH_MANAGE_AMOUNT, "stashManageAmount", 100000);
+	loadIntConfig(L, RESET_REQUIRED_LEVEL, "resetRequiredLevel", 100);
+	loadIntConfig(L, RESET_BACK_TO_LEVEL, "resetBackToLevel", 1);
+	loadIntConfig(L, RESET_MAX_RESETS, "resetMaxResets", 0);
 
 	loadStringConfig(L, CORE_DIRECTORY, "coreDirectory", "data");
 	loadStringConfig(L, DATA_DIRECTORY, "dataPackDirectory", "data-global");

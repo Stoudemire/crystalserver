@@ -40,6 +40,28 @@ rookSlotRight = 3270
 rookSlotLeft = 0
 rookSlotAmmo = 0
 
+-- Reset System
+-- NOTE: toggleResetSystem = true to enable the reset system, false to disable
+-- NOTE: resetRequiredLevel = minimum level required to perform a reset
+-- NOTE: resetDamageBonusPerReset = damage bonus percentage per reset (ex: 5.0 = 5% per reset)
+-- NOTE: resetDefenseBonusPerReset = defense bonus percentage per reset (ex: 3.0 = 3% per reset)
+-- NOTE: resetMaxResets = maximum number of resets a player can have (0 = unlimited)
+-- NOTE: resetBackToLevel = level to reset player to
+-- NOTE: toggleResetHealthManaBonus = when true, percent bonuses to health/mana after reset
+-- NOTE: resetBonusHealthPercent = percentage of max health to set after reset (e.g., 50.0 = 50%)
+-- NOTE: resetBonusManaPercent = percentage of max mana to set after reset (e.g., 50.0 = 50%)
+-- NOTE: toggleResetRestoreSpeed = true restores player speed to before level up
+toggleResetSystem = false
+resetRequiredLevel = 9999
+resetBackToLevel = 1
+resetDamageBonusPerReset = 2.0
+resetDefenseBonusPerReset = 1.0
+resetMaxResets = 10
+toggleResetHealthManaBonus = false
+resetBonusHealthPercent = 1.0
+resetBonusManaPercent = 1.0
+toggleResetRestoreSpeed = true
+
 -- Combat settings
 -- NOTE: valid values for worldType are: "pvp", "no-pvp" and "pvp-enforced"
 -- NOTE: removeBeginningWeaponAmmunition: spears, arrows, bolt have endless ammo (allows training for paladins)

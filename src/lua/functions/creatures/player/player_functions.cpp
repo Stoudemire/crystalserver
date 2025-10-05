@@ -211,6 +211,16 @@ void PlayerFunctions::init(lua_State* L) {
 	Lua::registerMethod(L, "Player", "getStorageValueByName", PlayerFunctions::luaPlayerGetStorageValueByName);
 	Lua::registerMethod(L, "Player", "setStorageValueByName", PlayerFunctions::luaPlayerSetStorageValueByName);
 
+	// Reset System
+	Lua::registerMethod(L, "Player", "canReset", PlayerFunctions::luaPlayerCanReset);
+	Lua::registerMethod(L, "Player", "performReset", PlayerFunctions::luaPlayerPerformReset);
+	Lua::registerMethod(L, "Player", "getResetCount", PlayerFunctions::luaPlayerGetResetCount);
+	Lua::registerMethod(L, "Player", "setResetCount", PlayerFunctions::luaPlayerSetResetCount);
+	Lua::registerMethod(L, "Player", "addResetCount", PlayerFunctions::luaPlayerAddResetCount);
+	Lua::registerMethod(L, "Player", "getResetDamageBonus", PlayerFunctions::luaPlayerGetResetDamageBonus);
+	Lua::registerMethod(L, "Player", "getResetDefenseBonus", PlayerFunctions::luaPlayerGetResetDefenseBonus);
+	Lua::registerMethod(L, "Player", "isResetSystemEnabled", PlayerFunctions::luaPlayerIsResetSystemEnabled);
+
 	Lua::registerMethod(L, "Player", "addItem", PlayerFunctions::luaPlayerAddItem);
 	Lua::registerMethod(L, "Player", "addItemEx", PlayerFunctions::luaPlayerAddItemEx);
 	Lua::registerMethod(L, "Player", "addItemStash", PlayerFunctions::luaPlayerAddItemStash);
@@ -5248,5 +5258,114 @@ int PlayerFunctions::luaPlayerSetVirtue(lua_State* L) {
 		lua_pushboolean(L, false);
 	}
 
+	return 1;
+}
+
+// Reset System Implementation
+int PlayerFunctions::luaPlayerCanReset(lua_State* L) {
+	// player:canReset()
+	const auto &player = Lua::getUserdataShared<Player>(L, 1);
+	if (!player) {
+		Lua::reportErrorFunc(Lua::getErrorDesc(LUA_ERROR_PLAYER_NOT_FOUND));
+		lua_pushnil(L);
+		return 1;
+	}
+
+	Lua::pushBoolean(L, player->canReset());
+	return 1;
+}
+
+int PlayerFunctions::luaPlayerPerformReset(lua_State* L) {
+	// player:performReset()
+	const auto &player = Lua::getUserdataShared<Player>(L, 1);
+	if (!player) {
+		Lua::reportErrorFunc(Lua::getErrorDesc(LUA_ERROR_PLAYER_NOT_FOUND));
+		lua_pushnil(L);
+		return 1;
+	}
+
+	Lua::pushBoolean(L, player->performReset());
+	return 1;
+}
+
+int PlayerFunctions::luaPlayerGetResetCount(lua_State* L) {
+	// player:getResetCount()
+	const auto &player = Lua::getUserdataShared<Player>(L, 1);
+	if (!player) {
+		Lua::reportErrorFunc(Lua::getErrorDesc(LUA_ERROR_PLAYER_NOT_FOUND));
+		lua_pushnil(L);
+		return 1;
+	}
+
+	lua_pushnumber(L, player->getResetCount());
+	return 1;
+}
+
+int PlayerFunctions::luaPlayerSetResetCount(lua_State* L) {
+	// player:setResetCount(count)
+	const auto &player = Lua::getUserdataShared<Player>(L, 1);
+	if (!player) {
+		Lua::reportErrorFunc(Lua::getErrorDesc(LUA_ERROR_PLAYER_NOT_FOUND));
+		lua_pushnil(L);
+		return 1;
+	}
+
+	const uint32_t count = Lua::getNumber<uint32_t>(L, 2, 0);
+	player->setResetCount(count);
+	Lua::pushBoolean(L, true);
+	return 1;
+}
+
+int PlayerFunctions::luaPlayerAddResetCount(lua_State* L) {
+	// player:addResetCount(amount)
+	const auto &player = Lua::getUserdataShared<Player>(L, 1);
+	if (!player) {
+		Lua::reportErrorFunc(Lua::getErrorDesc(LUA_ERROR_PLAYER_NOT_FOUND));
+		lua_pushnil(L);
+		return 1;
+	}
+
+	const uint32_t amount = Lua::getNumber<uint32_t>(L, 2, 1);
+	player->addResetCount(amount);
+	Lua::pushBoolean(L, true);
+	return 1;
+}
+
+int PlayerFunctions::luaPlayerGetResetDamageBonus(lua_State* L) {
+	// player:getResetDamageBonus()
+	const auto &player = Lua::getUserdataShared<Player>(L, 1);
+	if (!player) {
+		Lua::reportErrorFunc(Lua::getErrorDesc(LUA_ERROR_PLAYER_NOT_FOUND));
+		lua_pushnil(L);
+		return 1;
+	}
+
+	lua_pushnumber(L, player->getResetDamageBonus());
+	return 1;
+}
+
+int PlayerFunctions::luaPlayerGetResetDefenseBonus(lua_State* L) {
+	// player:getResetDefenseBonus()
+	const auto &player = Lua::getUserdataShared<Player>(L, 1);
+	if (!player) {
+		Lua::reportErrorFunc(Lua::getErrorDesc(LUA_ERROR_PLAYER_NOT_FOUND));
+		lua_pushnil(L);
+		return 1;
+	}
+
+	lua_pushnumber(L, player->getResetDefenseBonus());
+	return 1;
+}
+
+int PlayerFunctions::luaPlayerIsResetSystemEnabled(lua_State* L) {
+	// player:isResetSystemEnabled()
+	const auto &player = Lua::getUserdataShared<Player>(L, 1);
+	if (!player) {
+		Lua::reportErrorFunc(Lua::getErrorDesc(LUA_ERROR_PLAYER_NOT_FOUND));
+		lua_pushnil(L);
+		return 1;
+	}
+
+	Lua::pushBoolean(L, player->isResetSystemEnabled());
 	return 1;
 }

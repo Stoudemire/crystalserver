@@ -188,6 +188,16 @@ class PlayerFunctions {
 	static int luaPlayerGetStorageValueByName(lua_State* L);
 	static int luaPlayerSetStorageValueByName(lua_State* L);
 
+	// Reset System
+	static int luaPlayerCanReset(lua_State* L);
+	static int luaPlayerPerformReset(lua_State* L);
+	static int luaPlayerGetResetCount(lua_State* L);
+	static int luaPlayerSetResetCount(lua_State* L);
+	static int luaPlayerAddResetCount(lua_State* L);
+	static int luaPlayerGetResetDamageBonus(lua_State* L);
+	static int luaPlayerGetResetDefenseBonus(lua_State* L);
+	static int luaPlayerIsResetSystemEnabled(lua_State* L);
+
 	static int luaPlayerAddItem(lua_State* L);
 	static int luaPlayerAddItemEx(lua_State* L);
 	static int luaPlayerAddItemStash(lua_State* L);
