@@ -913,13 +913,13 @@ int32_t WeaponDistance::getWeaponDamage(const std::shared_ptr<Player> &player, c
 
 	int32_t minValue = player->getLevel() / 5;
 	int32_t maxValue = std::round((0.09f * attackFactor) * attackSkill * attackValue + minValue);
-	
+
 	// Apply reset damage bonus
 	int32_t resetDamageBonus = player->getResetDamageBonus();
 	if (resetDamageBonus > 0) {
 		maxValue += static_cast<int32_t>(maxValue * resetDamageBonus / 100.0);
 	}
-	
+
 	if (maxDamage) {
 		return -maxValue;
 	}
@@ -997,13 +997,13 @@ int32_t WeaponWand::getWeaponDamage(const std::shared_ptr<Player> &player, const
 
 	if (!g_configManager().getBoolean(CHAIN_SYSTEM_MODIFY_MAGIC)) {
 		int32_t maxValue = maxChange;
-		
+
 		// Apply reset damage bonus
 		int32_t resetDamageBonus = player->getResetDamageBonus();
 		if (resetDamageBonus > 0) {
 			maxValue += static_cast<int32_t>(maxValue * resetDamageBonus / 100.0);
 		}
-		
+
 		return maxDamage ? -maxValue : -normal_random(minChange, maxValue);
 	}
 

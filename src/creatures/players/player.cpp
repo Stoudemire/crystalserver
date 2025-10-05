@@ -262,7 +262,7 @@ std::string Player::getDescription(int32_t lookDistance) {
 			s << ", which has " << memberCount << " members, " << guild->getMembersOnline().size() << " of them online.";
 		}
 	}
-	
+
 	// Add reset information
 	if (isResetSystemEnabled() && getResetCount() > 0) {
 		if (lookDistance == -1) {
@@ -271,7 +271,7 @@ std::string Player::getDescription(int32_t lookDistance) {
 			s << " " << subjectPronoun << " " << getSubjectVerb() << " " << getResetCount() << " reset" << (getResetCount() == 1 ? "" : "s") << ".";
 		}
 	}
-	
+
 	return s.str();
 }
 
@@ -680,13 +680,13 @@ int32_t Player::getDefense(bool sendToClient /* = false*/) const {
 	auto defenseScalingFactor = shield ? 0.16f : (weapon && weapon->getDefense() > 0 ? 0.146f : 0.15f);
 
 	int32_t baseDefense = ((defenseSkill / 4.0 + 2.23) * defenseValue * getDefenseFactor(sendToClient) * defenseScalingFactor) * vocation->defenseMultiplier;
-	
+
 	// Apply reset defense bonus
 	int32_t resetDefenseBonus = getResetDefenseBonus();
 	if (resetDefenseBonus > 0) {
 		baseDefense += static_cast<int32_t>(baseDefense * resetDefenseBonus / 100.0);
 	}
-	
+
 	return baseDefense;
 }
 
@@ -3473,7 +3473,7 @@ void Player::addExperience(const std::shared_ptr<Creature> &target, uint64_t exp
 		ss << "You advanced from Level " << prevLevel << " to Level " << level << '.';
 		sendTextMessage(MESSAGE_EVENT_ADVANCE, ss.str());
 		sendTakeScreenshot(SCREENSHOT_TYPE_LEVELUP);
-		
+
 		// Check for reset
 		if (canReset()) {
 			performReset();
@@ -12021,17 +12021,17 @@ bool Player::canReset() const {
 	if (!g_configManager().getBoolean(TOGGLE_RESET_SYSTEM)) {
 		return false;
 	}
-	
+
 	uint32_t requiredLevel = g_configManager().getNumber(RESET_REQUIRED_LEVEL);
 	if (getLevel() < requiredLevel) {
 		return false;
 	}
-	
+
 	uint32_t maxResets = g_configManager().getNumber(RESET_MAX_RESETS);
 	if (maxResets > 0 && getResetCount() >= maxResets) {
 		return false;
 	}
-	
+
 	return true;
 }
 
@@ -12091,10 +12091,10 @@ int32_t Player::getResetDamageBonus() const {
 	if (!g_configManager().getBoolean(TOGGLE_RESET_SYSTEM)) {
 		return 0;
 	}
-	
+
 	uint32_t resetCount = getResetCount();
 	float bonusPerReset = g_configManager().getFloat(RESET_DAMAGE_BONUS_PER_RESET);
-	
+
 	float bonus = resetCount * bonusPerReset;
 	return static_cast<int32_t>(bonus);
 }
@@ -12103,10 +12103,10 @@ int32_t Player::getResetDefenseBonus() const {
 	if (!g_configManager().getBoolean(TOGGLE_RESET_SYSTEM)) {
 		return 0;
 	}
-	
+
 	uint32_t resetCount = getResetCount();
 	float bonusPerReset = g_configManager().getFloat(RESET_DEFENSE_BONUS_PER_RESET);
-	
+
 	float bonus = resetCount * bonusPerReset;
 	return static_cast<int32_t>(bonus);
 }
