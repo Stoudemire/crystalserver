@@ -3350,7 +3350,7 @@ void Player::addManaSpent(uint64_t amount) {
 }
 
 void Player::addExperience(const std::shared_ptr<Creature> &target, uint64_t exp, bool sendText /* = false*/) {
-	if (g_configManager().getBoolean(TOGGLE_RESET_RESTORE_SPEED)) {
+	if (isResetSystemEnabled() && g_configManager().getBoolean(TOGGLE_RESET_RESTORE_SPEED)) {
 		previousSpeed = getSpeed();
 	}
 
@@ -12018,7 +12018,7 @@ int16_t Player::getMantraAbsorbPercent(int16_t mantraAbsorbValue) const {
 
 // Reset System Implementation
 bool Player::canReset() const {
-	if (!g_configManager().getBoolean(TOGGLE_RESET_SYSTEM)) {
+	if (!isResetSystemEnabled()) {
 		return false;
 	}
 
@@ -12041,7 +12041,6 @@ bool Player::performReset() {
 	}
 
 	const uint32_t resetLevel = std::max<uint32_t>(1, static_cast<uint32_t>(g_configManager().getNumber(RESET_BACK_TO_LEVEL)));
-	const uint32_t previousLevel = getLevel();
 	setLevel(resetLevel);
 	experience = 0;
 	if (level > 1) {
@@ -12088,7 +12087,7 @@ void Player::addResetCount(uint32_t amount) {
 }
 
 int32_t Player::getResetDamageBonus() const {
-	if (!g_configManager().getBoolean(TOGGLE_RESET_SYSTEM)) {
+	if (!isResetSystemEnabled()) {
 		return 0;
 	}
 
@@ -12100,7 +12099,7 @@ int32_t Player::getResetDamageBonus() const {
 }
 
 int32_t Player::getResetDefenseBonus() const {
-	if (!g_configManager().getBoolean(TOGGLE_RESET_SYSTEM)) {
+	if (!isResetSystemEnabled()) {
 		return 0;
 	}
 
