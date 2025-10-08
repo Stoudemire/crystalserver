@@ -47,20 +47,18 @@ rookSlotAmmo = 0
 -- NOTE: resetDefenseBonusPerReset = defense bonus percentage per reset (ex: 3.0 = 3% per reset)
 -- NOTE: resetMaxResets = maximum number of resets a player can have (0 = unlimited)
 -- NOTE: resetBackToLevel = level to reset player to
--- NOTE: toggleResetHealthManaBonus = when true, percent bonuses to health/mana after reset
--- NOTE: resetBonusHealthPercent = percentage of max health to set after reset (e.g., 50.0 = 50%)
--- NOTE: resetBonusManaPercent = percentage of max mana to set after reset (e.g., 50.0 = 50%)
--- NOTE: toggleResetRestoreSpeed = true restores player speed to before level up
+-- NOTE: toggleResetHealthManaBonus = when true, flat bonuses to health/mana after reset
+-- NOTE: resetBonusHealth = flat value of max health to set after reset.
+-- NOTE: resetBonusMana = flat value of max mana to set after reset.
 toggleResetSystem = false
 resetRequiredLevel = 9999
-resetBackToLevel = 1
-resetDamageBonusPerReset = 2.0
-resetDefenseBonusPerReset = 1.0
-resetMaxResets = 10
+resetBackToLevel = 8
+resetDamageBonusPerReset = 0.5
+resetDefenseBonusPerReset = 0.5
+resetMaxResets = 0
 toggleResetHealthManaBonus = false
-resetBonusHealthPercent = 1.0
-resetBonusManaPercent = 1.0
-toggleResetRestoreSpeed = true
+resetBonusHealth = 0
+resetBonusMana = 0
 
 -- Combat settings
 -- NOTE: valid values for worldType are: "pvp", "no-pvp" and "pvp-enforced"

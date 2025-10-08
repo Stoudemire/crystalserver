@@ -38,7 +38,6 @@
 #include "creatures/players/imbuements/imbuements.hpp"
 #include "creatures/players/storages/storages.hpp"
 #include "creatures/players/vip/player_vip.hpp"
-#include "creatures/players/wheel/player_wheel.hpp"
 #include "server/network/protocol/protocolgame.hpp"
 #include "enums/account_errors.hpp"
 #include "enums/account_group_type.hpp"
@@ -3350,10 +3349,6 @@ void Player::addManaSpent(uint64_t amount) {
 }
 
 void Player::addExperience(const std::shared_ptr<Creature> &target, uint64_t exp, bool sendText /* = false*/) {
-	if (isResetSystemEnabled() && g_configManager().getBoolean(TOGGLE_RESET_RESTORE_SPEED)) {
-		previousSpeed = getSpeed();
-	}
-
 	uint64_t currLevelExp = getExpForLevel(level);
 	uint64_t nextLevelExp = getExpForLevel(level + 1);
 	uint64_t rawExp = exp;
@@ -3477,10 +3472,6 @@ void Player::addExperience(const std::shared_ptr<Creature> &target, uint64_t exp
 		// Check for reset
 		if (canReset()) {
 			performReset();
-			if (g_configManager().getBoolean(TOGGLE_RESET_RESTORE_SPEED)) {
-				setSpeed(previousSpeed);
-				g_game().changeSpeed(static_self_cast<Player>(), previousSpeed);
-			}
 		}
 	}
 
@@ -12040,30 +12031,47 @@ bool Player::performReset() {
 		return false;
 	}
 
-	const uint32_t resetLevel = std::max<uint32_t>(1, static_cast<uint32_t>(g_configManager().getNumber(RESET_BACK_TO_LEVEL)));
+	uint32_t resetLevel = g_configManager().getNumber(RESET_BACK_TO_LEVEL);
 	setLevel(resetLevel);
 	experience = 0;
+	healthMax = 150;
+	manaMax = 55;
 	if (level > 1) {
 		experience = Player::getExpForLevel(resetLevel);
 	}
 	levelPercent = 0;
 
-	health = getMaxHealth();
-	mana = getMaxMana();
-
-	if (g_configManager().getBoolean(TOGGLE_RESEET_HEALTH_MANA_BONUS)) {
-		double healthPercent = g_configManager().getFloat(RESET_BONUS_HEALTH_PERCENT);
-		double manaPercent = g_configManager().getFloat(RESET_BONUS_MANA_PERCENT);
-		if (healthPercent > 0) {
-			health = static_cast<int32_t>(std::floor(getMaxHealth() * (healthPercent / 100.0)));
-		}
-		if (manaPercent > 0) {
-			mana = static_cast<int32_t>(std::floor(getMaxMana() * (manaPercent / 100.0)));
+	// Recalculate max stats based on vocation and target level
+	auto currentVocation = vocation;
+	auto rookVocation = g_vocations().getVocation(VOCATION_NONE);
+	for (uint32_t i = 2; i <= resetLevel; ++i) {
+		if (i <= 8) {
+			healthMax += rookVocation ? rookVocation->getHPGain() : 5;
+			manaMax += rookVocation ? rookVocation->getManaGain() : 5;
+		} else {
+			healthMax += currentVocation ? currentVocation->getHPGain() : 0;
+			manaMax += currentVocation ? currentVocation->getManaGain() : 0;
 		}
 	}
 
-	addResetCount();
+	if (g_configManager().getBoolean(TOGGLE_RESEET_HEALTH_MANA_BONUS)) {
+		int32_t healthBonus = g_configManager().getNumber(RESET_BONUS_HEALTH);
+		int32_t manaBonus = g_configManager().getNumber(RESET_BONUS_MANA);
 
+		if (healthBonus > 0) {
+			healthMax += healthBonus;
+		}
+
+		if (manaBonus > 0) {
+			manaMax += manaBonus;
+		}
+	}
+
+	// Set current to max by default after reset
+	health = healthMax;
+	mana = manaMax;
+
+	addResetCount();
 	sendTextMessage(MESSAGE_EVENT_ADVANCE, fmt::format("You have been reset to level {}!", resetLevel));
 	sendTextMessage(MESSAGE_EVENT_ADVANCE, fmt::format("Reset count: {}", getResetCount()));
 

@@ -1633,7 +1633,6 @@ private:
 	uint32_t coinBalance = 0;
 	uint32_t coinTransferableBalance = 0;
 	uint16_t xpBoostTime = 0;
-	uint32_t previousSpeed = 0;
 
 	bool randomMount = false;
 
