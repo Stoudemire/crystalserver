@@ -62,33 +62,30 @@ bool Spectators::checkCache(const SpectatorsCache::FloorData &specData, bool onl
 	if (checkDistance) {
 		CreatureVector spectators;
 		spectators.reserve(list->size());
-		
+
 		// Pre-calculate type checks
 		const bool needsTypeCheck = onlyPlayers || onlyMonsters || onlyNpcs;
-		
+
 		for (const auto &creature : *list) {
 			const auto &specPos = creature->getPosition();
-			
+
 			// Check distance first (most likely to fail)
-			if (centerPos.x - specPos.x < minRangeX || centerPos.x - specPos.x > maxRangeX ||
-			    centerPos.y - specPos.y < minRangeY || centerPos.y - specPos.y > maxRangeY) {
+			if (centerPos.x - specPos.x < minRangeX || centerPos.x - specPos.x > maxRangeX || centerPos.y - specPos.y < minRangeY || centerPos.y - specPos.y > maxRangeY) {
 				continue;
 			}
-			
+
 			// Check floor
 			if (!multifloor && specPos.z != centerPos.z) {
 				continue;
 			}
-			
+
 			// Check type if needed
 			if (needsTypeCheck) {
-				if ((onlyPlayers && !creature->getPlayer()) ||
-				    (onlyMonsters && !creature->getMonster()) ||
-				    (onlyNpcs && !creature->getNpc())) {
+				if ((onlyPlayers && !creature->getPlayer()) || (onlyMonsters && !creature->getMonster()) || (onlyNpcs && !creature->getNpc())) {
 					continue;
 				}
 			}
-			
+
 			spectators.emplace_back(creature);
 		}
 		insertAll(spectators);
@@ -148,10 +145,10 @@ CreatureVector Spectators::getSpectators(const Position &centerPos, bool multifl
 
 	const MapSector* startSector = g_game().map.getMapSector(startx1, starty1);
 	const MapSector* sectorS = startSector;
-	
+
 	// Pre-calculate type checks
 	const bool needsTypeCheck = onlyPlayers || onlyMonsters || onlyNpcs;
-	
+
 	for (int32_t ny = starty1; ny <= endy2; ny += SECTOR_SIZE) {
 		const MapSector* sectorE = sectorS;
 		for (int32_t nx = startx1; nx <= endx2; nx += SECTOR_SIZE) {
@@ -163,19 +160,18 @@ CreatureVector Spectators::getSpectators(const Position &centerPos, bool multifl
 
 				for (const auto &creature : nodeList) {
 					const auto &cpos = creature->getPosition();
-					
+
 					// Check Z range first (most likely to fail)
 					if (static_cast<uint32_t>(static_cast<int32_t>(cpos.z) - minRangeZ) > depth) {
 						continue;
 					}
-					
+
 					const int_fast16_t offsetZ = Position::getOffsetZ(centerPos, cpos);
 					const int32_t adjustedX = cpos.x - offsetZ;
 					const int32_t adjustedY = cpos.y - offsetZ;
-					
+
 					// Check X and Y ranges
-					if (static_cast<uint32_t>(adjustedX - min_x) <= width && 
-					    static_cast<uint32_t>(adjustedY - min_y) <= height) {
+					if (static_cast<uint32_t>(adjustedX - min_x) <= width && static_cast<uint32_t>(adjustedY - min_y) <= height) {
 						spectators.emplace_back(creature);
 					}
 				}
@@ -306,9 +302,7 @@ Spectators Spectators::filter(bool onlyPlayers, bool onlyMonsters, bool onlyNpcs
 	specs.creatures.reserve(creatures.size());
 
 	for (const auto &c : creatures) {
-		if ((onlyPlayers && c->getPlayer() != nullptr) ||
-		    (onlyMonsters && c->getMonster() != nullptr) ||
-		    (onlyNpcs && c->getNpc() != nullptr)) {
+		if ((onlyPlayers && c->getPlayer() != nullptr) || (onlyMonsters && c->getMonster() != nullptr) || (onlyNpcs && c->getNpc() != nullptr)) {
 			specs.creatures.emplace_back(c);
 		}
 	}
