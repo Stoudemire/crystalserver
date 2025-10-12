@@ -361,7 +361,9 @@ uint32_t IOGuild::createGuild(const std::string &guildName, const std::string &l
 
 	uint32_t guildId = db.getLastInsertId();
 	std::ostringstream query5;
-	query5 << "INSERT INTO `guild_ranks` (`guild_id`, `name`, `level`) VALUES (" << guildId << ", 'Leader', 3), " << "(" << guildId << ", 'Vice-Leader', 2), " << "(" << guildId << ", 'Member', 1)";
+	query5 << "INSERT INTO `guild_ranks` (`guild_id`, `name`, `level`) VALUES (" << guildId << ", 'Leader', 3), "
+		   << "(" << guildId << ", 'Vice-Leader', 2), "
+		   << "(" << guildId << ", 'Member', 1)";
 	if (!db.executeQuery(query5.str())) {
 		return 0;
 	}

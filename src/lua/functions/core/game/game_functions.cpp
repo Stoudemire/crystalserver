@@ -125,7 +125,7 @@ void GameFunctions::init(lua_State* L) {
 	Lua::registerMethod(L, "Game", "getHouseCountByAccount", GameFunctions::luaHouseGetHouseCountByAccount);
 
 	Lua::registerMethod(L, "Game", "setGuildMotd", GameFunctions::luaGameSetGuildMotd);
-	
+
 	// Guild management functions
 	Lua::registerMethod(L, "Game", "disbandGuild", GameFunctions::luaGameDisbandGuild);
 	Lua::registerMethod(L, "Game", "invitePlayerToGuild", GameFunctions::luaGameInvitePlayerToGuild);

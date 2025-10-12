@@ -29,7 +29,7 @@ public:
 
 	static bool setMotd(uint32_t guildId, std::string newMotd);
 	static std::string getMotd(uint32_t guildId);
-	
+
 	// Guild management functions
 	static bool disbandGuild(uint32_t guildId);
 	static bool invitePlayerToGuild(uint32_t guildId, const std::string &playerName);

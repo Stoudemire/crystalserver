@@ -267,7 +267,7 @@ public:
 
 	void setGuildMotd(uint32_t guildId, const std::string &newMotd);
 	void sendGuildMotd(uint32_t playerId, uint32_t guildId);
-	
+
 	// Guild management functions
 	void disbandGuild(uint32_t guildId);
 	void invitePlayerToGuild(uint32_t guildId, const std::string &playerName);
