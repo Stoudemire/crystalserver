@@ -74,10 +74,14 @@ loginProtectionPeriod = 10 * 1000
 -- ingameGuildManagement: set true to enable in-game guild commands.
 -- guildWarsDefaultFrags: Default frags for guild war invitations if not specified.
 -- guildWarsMinimunFrags: Minimum frags required to initiate a guild war.
+-- levelToFormGuild: Minimum level required to create a guild.
+-- createGuildOnlyPremium: Only premium players can create guilds.
 ingameGuildManagement = true
 toggleGuildWars = false
 guildWarsDefaultFrags = 100
 guildWarsMinimunFrags = 10
+levelToFormGuild = 8
+createGuildOnlyPremium = true
 
 -- Clean system
 cleanProtectionZones = false

@@ -606,6 +606,18 @@ function createGuild.onSay(player, words, param)
 		return true
 	end
 
+	local levelToFormGuild = configManager.getNumber(configKeys.LEVEL_TO_FORM_GUILD)
+	if player:getLevel() < levelToFormGuild then
+		player:sendCancelMessage("You need to be at least level " .. levelToFormGuild .. " to create a guild.")
+		return true
+	end
+
+	local createGuildOnlyPremium = configManager.getBoolean(configKeys.CREATE_GUILD_ONLY_PREMIUM)
+	if createGuildOnlyPremium and not player:isPremium() then
+		player:sendCancelMessage("Only premium players can create guilds.")
+		return true
+	end
+
 	if param == "" then
 		player:sendCancelMessage("Usage: !createguild guild name")
 		return true
