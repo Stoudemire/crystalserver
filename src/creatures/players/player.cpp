@@ -933,7 +933,8 @@ void Player::updateInventoryWeight() {
 	inventoryWeightScheduledEventId = g_dispatcher().scheduleEvent(
 		SCHEDULER_MINTICKS, [self] {
 			self->computeInventoryWeight();
-		}, "Player::updateInventoryWeight(debounced)"
+		},
+		"Player::updateInventoryWeight(debounced)"
 	);
 }
 
@@ -947,7 +948,8 @@ void Player::updateInventoryImbuement() {
 	inventoryImbuementScheduledEventId = g_dispatcher().scheduleEvent(
 		SCHEDULER_MINTICKS, [self] {
 			self->computeInventoryImbuement();
-		}, "Player::updateInventoryImbuement(debounced)"
+		},
+		"Player::updateInventoryImbuement(debounced)"
 	);
 }
 
@@ -983,7 +985,7 @@ void Player::computeInventoryImbuement() {
 			}
 
 			const auto imbuement = imbuementInfo.imbuement;
-			const CategoryImbuement *categoryImbuement = g_imbuements().getCategoryByID(imbuement->getCategory());
+			const CategoryImbuement* categoryImbuement = g_imbuements().getCategoryByID(imbuement->getCategory());
 			const auto &parent = item->getParent();
 			const bool isInBackpack = parent && parent->getContainer();
 
