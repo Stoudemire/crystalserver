@@ -1672,7 +1672,7 @@ void Player::updatePartyTrackerAnalyzer() const {
 void Player::sendLootStats(const std::shared_ptr<Item> &item, uint8_t count) {
 	// Batch loot stats to reduce I/O and allocations
 	batchedTrackerData.lootItems.emplace_back(item, count);
-	
+
 	// Calculate value for metrics
 	uint64_t value = 0;
 	if (item->getID() == ITEM_GOLD_COIN || item->getID() == ITEM_PLATINUM_COIN || item->getID() == ITEM_CRYSTAL_COIN) {
@@ -1696,7 +1696,8 @@ void Player::sendLootStats(const std::shared_ptr<Item> &item, uint8_t count) {
 		trackerBatchEventId = g_dispatcher().scheduleEvent(
 			250, [self] {
 				self->flushBatchedTrackerData();
-			}, "Player::flushBatchedTrackerData"
+			},
+			"Player::flushBatchedTrackerData"
 		);
 	}
 }
@@ -1704,7 +1705,7 @@ void Player::sendLootStats(const std::shared_ptr<Item> &item, uint8_t count) {
 void Player::updateSupplyTracker(const std::shared_ptr<Item> &item) {
 	// Batch supply tracker to reduce I/O and allocations
 	batchedTrackerData.supplyItems.push_back(item);
-	
+
 	const auto &iType = Item::items.getItemType(item->getID());
 	batchedTrackerData.supplyValue += iType.buyPrice;
 
@@ -1715,7 +1716,8 @@ void Player::updateSupplyTracker(const std::shared_ptr<Item> &item) {
 		trackerBatchEventId = g_dispatcher().scheduleEvent(
 			250, [self] {
 				self->flushBatchedTrackerData();
-			}, "Player::flushBatchedTrackerData"
+			},
+			"Player::flushBatchedTrackerData"
 		);
 	}
 }
@@ -1731,7 +1733,8 @@ void Player::updateImpactTracker(CombatType_t type, int32_t amount) const {
 		const_cast<Player*>(this)->trackerBatchEventId = g_dispatcher().scheduleEvent(
 			250, [self] {
 				self->flushBatchedTrackerData();
-			}, "Player::flushBatchedTrackerData"
+			},
+			"Player::flushBatchedTrackerData"
 		);
 	}
 }
@@ -1747,7 +1750,8 @@ void Player::updateInputAnalyzer(CombatType_t type, int32_t amount, const std::s
 		const_cast<Player*>(this)->trackerBatchEventId = g_dispatcher().scheduleEvent(
 			250, [self] {
 				self->flushBatchedTrackerData();
-			}, "Player::flushBatchedTrackerData"
+			},
+			"Player::flushBatchedTrackerData"
 		);
 	}
 }
@@ -1800,7 +1804,7 @@ void Player::flushBatchedTrackerData() {
 	}
 
 	// Clear batched data
-	batchedTrackerData = BatchedTrackerData{};
+	batchedTrackerData = BatchedTrackerData {};
 }
 
 void Player::createLeaderTeamFinder(NetworkMessage &msg) const {
