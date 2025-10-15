@@ -91,8 +91,8 @@ bool Proficiencies::loadFromJson(bool /* reloading */) {
 					perk.bestiaryId = perkJson.at("BestiaryId").get<uint8_t>();
 				}
 
-				//if (perkJson.contains("BestiaryName")) {
-					//perk.bestiaryName = perkJson.at("BestiaryName").get<std::string>();
+				// if (perkJson.contains("BestiaryName")) {
+				// perk.bestiaryName = perkJson.at("BestiaryName").get<std::string>();
 				//}
 
 				if (perkJson.contains("DamageType")) {

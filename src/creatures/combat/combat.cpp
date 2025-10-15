@@ -2510,7 +2510,7 @@ void Combat::applyExtensions(const std::shared_ptr<Creature> &caster, const std:
 		return;
 	}
 
-	if (const auto &player = caster->getPlayer()) {	
+	if (const auto &player = caster->getPlayer()) {
 		int32_t baseCriticalHitChance = static_cast<int32_t>(player->getSkillLevel(SKILL_CRITICAL_HIT_CHANCE));
 		baseCriticalHitChance += damage.criticalChance;
 

@@ -144,7 +144,7 @@ struct WeaponProficiencyData {
 };
 
 struct WeaponProficiencyAugment {
-	uint16_t spellId = 0; 
+	uint16_t spellId = 0;
 	WeaponProficiencyPerkAugmentType_t augmentType = PROFICIENCY_AUGMENTTYPE_NONE;
 	float value = 0;
 };
@@ -192,18 +192,18 @@ struct EquippedWeaponProficiencyBonuses {
 		damageGainBossAndSinisterEmbraced = 0;
 		critHitChance = 0;
 		std::fill(std::begin(critHitChanceForElementIdToSpellsAndRunes), std::end(critHitChanceForElementIdToSpellsAndRunes), 0);
-		critHitChanceForOffensiveRunes = 0; 
+		critHitChanceForOffensiveRunes = 0;
 		critHitChanceForAutoAttack = 0;
-		critExtraDamage = 0; 
+		critExtraDamage = 0;
 		std::fill(std::begin(critExtraDamageForElementIdToSpellsAndRunes), std::end(critExtraDamageForElementIdToSpellsAndRunes), 0);
 		critExtraDamageForOffensiveRunes = 0;
 		critExtraDamageForAutoAttack = 0;
 		manaLeech = 0;
 		lifeLeech = 0;
-		manaGainOnHit = 0; 
-		lifeGainOnHit = 0; 
+		manaGainOnHit = 0;
+		lifeGainOnHit = 0;
 		manaGainOnKill = 0;
-		lifeGainOnKill = 0; 
+		lifeGainOnKill = 0;
 		gainDamageAtRange.clear();
 		rangedHitChance = 0;
 		attackRange = 0;

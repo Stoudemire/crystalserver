@@ -686,7 +686,7 @@ uint16_t Player::getDefenseEquipment() const {
 	}
 
 	if (shield) {
-		defenseValue = weapon != nullptr ? (shield->getDefense() +  equippedWeaponProficiency.defense) + (weapon->getExtraDefense() + equippedWeaponProficiency.weaponShieldMod) : shield->getDefense();
+		defenseValue = weapon != nullptr ? (shield->getDefense() + equippedWeaponProficiency.defense) + (weapon->getExtraDefense() + equippedWeaponProficiency.weaponShieldMod) : shield->getDefense();
 		if (shield->getDefense() > 0) {
 			defenseValue += wheel()->getMajorStatConditional("Combat Mastery", WheelMajor_t::DEFENSE);
 		}
@@ -2496,7 +2496,6 @@ void Player::onApplyImbuement(const Imbuement* imbuement, const std::shared_ptr<
 		return;
 	}
 
-
 	const auto &thisPlayer = getPlayer();
 	bool canAddImbuement = false;
 
@@ -2713,7 +2712,7 @@ void Player::onClearAllImbuementsOnEtcher(const std::shared_ptr<Item> &item) {
 		return;
 	}
 
-	bool removedImbuement = false; 
+	bool removedImbuement = false;
 
 	for (uint8_t slot = 0; slot < item->getImbuementSlot(); slot++) {
 		ImbuementInfo imbuementInfo;
@@ -12218,7 +12217,7 @@ int16_t Player::getMantraAbsorbPercent(int16_t mantraAbsorbValue) const {
 	return static_cast<int16_t>(std::floor(mantraAbsorbValue * multiplier));
 }
 
-EquippedWeaponProficiencyBonuses &Player::getEquippedWeaponProficiency(){
+EquippedWeaponProficiencyBonuses &Player::getEquippedWeaponProficiency() {
 	return equippedWeaponProficiency;
 }
 
@@ -12230,9 +12229,15 @@ void Player::addWeaponProficiencyExperience(const std::shared_ptr<MonsterType> &
 		if (mType->isBoss()) {
 			const BosstiaryRarity_t bosstiaryRace = mType->info.bosstiaryRace;
 			switch (bosstiaryRace) {
-				case BosstiaryRarity_t::RARITY_BANE: addProficiencyExperience = 500; break;
-				case BosstiaryRarity_t::RARITY_ARCHFOE: addProficiencyExperience = 5000; break;
-				case BosstiaryRarity_t::RARITY_NEMESIS: addProficiencyExperience = 15000; break;
+				case BosstiaryRarity_t::RARITY_BANE:
+					addProficiencyExperience = 500;
+					break;
+				case BosstiaryRarity_t::RARITY_ARCHFOE:
+					addProficiencyExperience = 5000;
+					break;
+				case BosstiaryRarity_t::RARITY_NEMESIS:
+					addProficiencyExperience = 15000;
+					break;
 				default:
 					g_logger().error("[{}] Monster {} Invalid bosstiaryRace value: {}.", __FUNCTION__, mType->name, bosstiaryRace);
 					addProficiencyExperience = 0;
@@ -12241,12 +12246,24 @@ void Player::addWeaponProficiencyExperience(const std::shared_ptr<MonsterType> &
 		} else {
 			const uint8_t bestiaryStars = mType->info.bestiaryStars;
 			switch (bestiaryStars) {
-				case 0: addProficiencyExperience = 1; break;
-				case 1: addProficiencyExperience = 30; break;
-				case 2: addProficiencyExperience = 70; break;
-				case 3: addProficiencyExperience = 100; break;
-				case 4: addProficiencyExperience = 165; break;
-				case 5: addProficiencyExperience = 240; break;
+				case 0:
+					addProficiencyExperience = 1;
+					break;
+				case 1:
+					addProficiencyExperience = 30;
+					break;
+				case 2:
+					addProficiencyExperience = 70;
+					break;
+				case 3:
+					addProficiencyExperience = 100;
+					break;
+				case 4:
+					addProficiencyExperience = 165;
+					break;
+				case 5:
+					addProficiencyExperience = 240;
+					break;
 				default:
 					g_logger().error("[{}] Monster {} Invalid bestiaryStars value: {}.", __FUNCTION__, mType->name, bestiaryStars);
 					addProficiencyExperience = 0;
@@ -12270,7 +12287,7 @@ void Player::addWeaponProficiencyExperience(const std::shared_ptr<MonsterType> &
 
 	const ItemType &itemType = Item::items[weaponItemId];
 	if (!itemType.proficiencyId) {
-		return ;
+		return;
 	}
 
 	const uint8_t addLifeGainOnKill = equippedWeaponProficiency.lifeGainOnKill;
@@ -12295,7 +12312,7 @@ void Player::addWeaponProficiencyExperience(const std::shared_ptr<MonsterType> &
 void Player::sendWeaponProficiencyExperience(const uint16_t itemId, const uint32_t addProficiencyExperience) {
 	const ItemType &itemType = Item::items[itemId];
 	if (!itemType.proficiencyId) {
-		return ;
+		return;
 	}
 
 	auto iter = weaponProficiencies.find(itemId);
@@ -12339,7 +12356,7 @@ void Player::applyEquippedWeaponProficiency(const uint16_t itemId) {
 		return;
 	}
 
-	const WeaponProficiencyData& playerProficiencyData = it->second;
+	const WeaponProficiencyData &playerProficiencyData = it->second;
 
 	const WeaponProficiencyStruct* proficiencyData = g_proficiencies().getProficiencyByItemId(itemId);
 	if (!proficiencyData) {
@@ -12595,7 +12612,7 @@ void Player::removeEquippedWeaponProficiency(const uint16_t itemId) {
 		return;
 	}
 
-	const WeaponProficiencyData& playerProficiencyData = it->second;
+	const WeaponProficiencyData &playerProficiencyData = it->second;
 
 	const WeaponProficiencyStruct* proficiencyData = g_proficiencies().getProficiencyByItemId(itemId);
 	if (!proficiencyData) {

@@ -260,7 +260,7 @@ void Items::loadFromProtobuf() {
 		} else {
 			iType.proficiencyId = 0;
 		}
-	
+
 		if (!iType.name.empty()) {
 			nameToItems.insert({ asLowerCaseString(iType.name), iType.id });
 		}

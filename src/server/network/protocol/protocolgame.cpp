@@ -8461,7 +8461,7 @@ void ProtocolGame::addImbuementInfo(NetworkMessage &msg, uint16_t imbuementId, b
 
 void ProtocolGame::openImbuementWindow(const Imbuement_Window_t type, const std::shared_ptr<Item> &item /*= nullptr*/) {
 	player->setImbuingItem(item);
-	
+
 	sendResourcesBalance(player->getMoney(), player->getBankBalance(), player->getPreyCards(), player->getTaskHuntingPoints());
 
 	NetworkMessage msg;
@@ -8476,7 +8476,7 @@ void ProtocolGame::openImbuementWindow(const Imbuement_Window_t type, const std:
 		msg.add<uint32_t>(0x00);
 
 	} else if (type == IMBUEMENT_WINDOW_SELECT_ITEM) {
-		msg.addByte(0x00);	// unknown 
+		msg.addByte(0x00); // unknown
 
 		msg.add<uint16_t>(item->getID());
 		if (!oldProtocol && item->getClassification() > 0) {
@@ -10186,10 +10186,8 @@ void ProtocolGame::parseWeaponProficiency(NetworkMessage &msg) {
 			const uint8_t proficiencyLevel = msg.getByte();
 			const uint8_t perkPosition = msg.getByte();
 
-			proficiency.activePerks.push_back({
-				static_cast<uint8_t>(proficiencyLevel + 1),
-				static_cast<uint8_t>(perkPosition + 1)
-			});
+			proficiency.activePerks.push_back({ static_cast<uint8_t>(proficiencyLevel + 1),
+			                                    static_cast<uint8_t>(perkPosition + 1) });
 		}
 
 		player->applyEquippedWeaponProficiency(itemId);
