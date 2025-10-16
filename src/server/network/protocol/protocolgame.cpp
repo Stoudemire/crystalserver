@@ -292,7 +292,7 @@ namespace {
 		uint16_t flatBonus = 0;
 		if (skill == SKILL_CRITICAL_HIT_DAMAGE) {
 			flatBonus = 1000;
-		} else if (skill == SKILL_CRITICAL_HIT_CHANCE){
+		} else if (skill == SKILL_CRITICAL_HIT_CHANCE) {
 			flatBonus = 500;
 			if (player->isConcoctionActive(Concoction_t::StrikeEnhancement)) {
 				concoctionBonus = 500; // Concoction Bonus
@@ -4305,7 +4305,7 @@ void ProtocolGame::sendCyclopediaCharacterOffenceStats() {
 	msg.addByte(0xDA);
 	msg.addByte(CYCLOPEDIA_CHARACTERINFO_OFFENCESTATS);
 	msg.addByte(0x00); // 0x00 Here means 'no error'
-	
+
 	addCyclopediaSkills(player, msg, SKILL_CRITICAL_HIT_CHANCE);
 	addCyclopediaSkills(player, msg, SKILL_CRITICAL_HIT_DAMAGE);
 	addCyclopediaSkills(player, msg, SKILL_LIFE_LEECH_AMOUNT);
