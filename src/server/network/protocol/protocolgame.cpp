@@ -6459,6 +6459,7 @@ void ProtocolGame::sendMarketDetail(uint16_t itemId, uint8_t tier) {
 			} else {
 				msg.add<uint16_t>(0x00); // no mantra
 			}
+			msg.add<uint16_t>(0x00); // string imbuement effect
 			msg.addString(ss.str());
 		} else if (it.upgradeClassification > 0 && tier == 0) {
 			msg.addString(std::to_string(it.upgradeClassification));
@@ -6468,6 +6469,7 @@ void ProtocolGame::sendMarketDetail(uint16_t itemId, uint8_t tier) {
 			} else {
 				msg.add<uint16_t>(0x00); // no mantra
 			}
+			msg.add<uint16_t>(0x00); // string imbuement effect
 			msg.addString(std::to_string(tier));
 		} else {
 			msg.add<uint16_t>(0x00); // no classification
@@ -6477,6 +6479,7 @@ void ProtocolGame::sendMarketDetail(uint16_t itemId, uint8_t tier) {
 			} else {
 				msg.add<uint16_t>(0x00); // no mantra
 			}
+			msg.add<uint16_t>(0x00); // string imbuement effect
 			msg.add<uint16_t>(0x00); // no tier
 		}
 	}
