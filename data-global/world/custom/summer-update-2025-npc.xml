@@ -42,9 +42,6 @@
 	<npc centerx="33267" centery="31845" centerz="6" radius="5">
 		<npc name="Eliza" x="0" y="0" z="6" spawntime="60" />
 	</npc>
-	<npc centerx="32952" centery="32030" centerz="6" radius="5">
-		<npc name="Guide Elena" x="0" y="0" z="6" spawntime="60" />
-	</npc>
 	<npc centerx="32284" centery="32890" centerz="6" radius="5">
 		<npc name="Jack Fate" x="0" y="0" z="6" spawntime="60" />
 	</npc>
