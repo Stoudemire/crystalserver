@@ -288,12 +288,24 @@ namespace {
 	 * @param[in] skill The specific skill to calculate (e.g., Life Leech, Mana Leech, Critical Hit Damage, etc.).
 	 */
 	void addCyclopediaSkills(std::shared_ptr<Player> &player, NetworkMessage &msg, skills_t skill) {
+		uint16_t concoctionBonus = 0;
+		uint16_t flatBonus = 0;
+		if (skill == SKILL_CRITICAL_HIT_DAMAGE) {
+			flatBonus = 1000;
+		} else if (skill == SKILL_CRITICAL_HIT_CHANCE){
+			flatBonus = 500;
+			if (player->isConcoctionActive(Concoction_t::StrikeEnhancement)) {
+				concoctionBonus = 500; // Concoction Bonus
+			}
+		}
+
 		const auto skillTotal = player->getSkillLevel(skill);
 		const auto &playerItem = player->getInventoryItem(CONST_SLOT_LEFT);
 		double skillEquipment = 0.0;
 		if (playerItem) {
 			skillEquipment = playerItem->getSkill(skill);
 
+			// Weapon Proficiency
 			if (skill == SKILL_LIFE_LEECH_AMOUNT) {
 				skillEquipment += player->getEquippedWeaponProficiency().lifeLeech;
 			} else if (skill == SKILL_MANA_LEECH_AMOUNT) {
@@ -318,13 +330,23 @@ namespace {
 			skillWheel += playerWheel->checkAvatarSkill(WheelAvatarSkill_t::CRITICAL_DAMAGE);
 		}
 
-		double skillImbuement = skillTotal - skillEquipment - skillWheel;
+		double skillImbuement = skillTotal - concoctionBonus - flatBonus - skillEquipment - skillWheel;
 
-		msg.addDouble(skillTotal / 10000.);
-		msg.addDouble(skillEquipment / 10000.);
-		msg.addDouble(skillImbuement / 10000.);
-		msg.addDouble(skillWheel / 10000.);
-		msg.addDouble(0.00);
+		msg.addDouble(skillTotal / 10000.); // Total Bonus
+
+		if (skill == SKILL_CRITICAL_HIT_DAMAGE || skill == SKILL_CRITICAL_HIT_CHANCE) {
+			msg.addDouble(flatBonus / 10000.); // Flat Bonus
+		}
+
+		msg.addDouble(skillEquipment / 10000.); // Equipament Bonus
+		msg.addDouble(skillImbuement / 10000.); // Imbuement Bonus
+		msg.addDouble(skillWheel / 10000.); // Whell Bonus
+
+		if (skill == SKILL_LIFE_LEECH_AMOUNT || skill == SKILL_MANA_LEECH_AMOUNT) {
+			msg.addDouble(0.00); // Event Bonus
+		} else if (skill == SKILL_CRITICAL_HIT_CHANCE || skill == SKILL_CRITICAL_HIT_DAMAGE) {
+			msg.addDouble(concoctionBonus / 10000.); // Concoction Bonus
+		}
 	}
 } // namespace
 
@@ -4283,13 +4305,8 @@ void ProtocolGame::sendCyclopediaCharacterOffenceStats() {
 	msg.addByte(0xDA);
 	msg.addByte(CYCLOPEDIA_CHARACTERINFO_OFFENCESTATS);
 	msg.addByte(0x00); // 0x00 Here means 'no error'
-
-	msg.addDouble(player->getSkillLevel(SKILL_CRITICAL_HIT_CHANCE) / 10000.); // Crit Chance Total
-	msg.addDouble(0.00);
-	msg.addDouble(0.00);
-	msg.addDouble(0.00);
-	msg.addDouble(0.00);
-
+	
+	addCyclopediaSkills(player, msg, SKILL_CRITICAL_HIT_CHANCE);
 	addCyclopediaSkills(player, msg, SKILL_CRITICAL_HIT_DAMAGE);
 	addCyclopediaSkills(player, msg, SKILL_LIFE_LEECH_AMOUNT);
 	addCyclopediaSkills(player, msg, SKILL_MANA_LEECH_AMOUNT);
@@ -4302,7 +4319,7 @@ void ProtocolGame::sendCyclopediaCharacterOffenceStats() {
 	msg.addDouble(player->getCleavePercent() / 100.);
 
 	// Perfect shot range (12.70)
-	for (uint8_t range = 1; range <= 5; range++) {
+	for (uint8_t range = 1; range <= 7; range++) {
 		msg.add<uint16_t>(static_cast<uint16_t>(player->getPerfectShotDamage(range)));
 	}
 
@@ -4422,8 +4439,34 @@ void ProtocolGame::sendCyclopediaCharacterOffenceStats() {
 
 		msg.addDouble(0.0);
 		msg.addByte(0x00);
-		msg.addByte(0x00);
+
+		msg.addByte(0x00); // distanceAccuracySize
 	}
+
+	msg.addDouble(0x00);
+
+	msg.add<uint16_t>(0x00);
+
+	msg.addByte(0x00);
+
+	msg.addDouble(0x00);
+	msg.addDouble(0x00);
+
+	msg.addByte(0x00);
+
+	msg.addDouble(0x00);
+	msg.addDouble(0x00);
+
+	msg.add<uint16_t>(0x00);
+	msg.add<uint16_t>(0x00);
+	msg.add<uint16_t>(0x00);
+	msg.add<uint16_t>(0x00);
+
+	msg.addByte(0x00);
+
+	msg.addByte(0x00);
+
+	msg.addByte(0x00);
 
 	writeToOutputBuffer(msg);
 }
@@ -4542,6 +4585,9 @@ void ProtocolGame::sendCyclopediaCharacterMiscStats() {
 		msg.add<uint32_t>(concoction.second);
 	}
 
+	msg.addByte(0x00);
+	msg.addByte(0x00);
+	msg.addByte(0x00);
 	msg.addByte(0x00);
 
 	writeToOutputBuffer(msg);
