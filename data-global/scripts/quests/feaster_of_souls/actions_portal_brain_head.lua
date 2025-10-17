@@ -183,7 +183,6 @@ function teleportBoss.onStepIn(creature, item, position, fromPosition)
 	end
 
 	addEvent(clearZoneMonsters, 5 * 60 * 1000)
-	addEvent(checkBadThoughts, 10 * 1000)
 
 	player:teleportTo(config.destination)
 	player:getPosition():sendMagicEffect(CONST_ME_TELEPORT)
