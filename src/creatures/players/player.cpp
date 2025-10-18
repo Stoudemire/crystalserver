@@ -10736,7 +10736,7 @@ void Player::openPlayerContainers() {
 	static std::unordered_map<uint32_t, int64_t> lastContainerUpdate;
 	int64_t currentTime = OTSYS_TIME();
 	int64_t throttleDelay = 100; // 100ms
-	
+
 	if (lastContainerUpdate[getID()] + throttleDelay > currentTime) {
 		return;
 	}
@@ -10799,7 +10799,7 @@ void Player::sendLootContainers() const {
 	static std::unordered_map<uint32_t, int64_t> lastLootContainerUpdate;
 	int64_t currentTime = OTSYS_TIME();
 	int64_t throttleDelay = 200; // 200ms
-	
+
 	if (lastLootContainerUpdate[getID()] + throttleDelay > currentTime) {
 		return;
 	}
