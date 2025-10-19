@@ -1,9 +1,10 @@
 local config = {
 	bossName = "Brain Head",
 	requiredLevel = 250,
-	timeToFightAgain = 10, -- In hour
+	timeToFightAgain = 24, -- In hour
 	destination = Position(31963, 32324, 10),
 	exitPosition = Position(31971, 32325, 10),
+	minBadThoughts = 4,
 }
 
 local entrancesTiles = {
@@ -51,6 +52,43 @@ zone:blockFamiliars()
 zone:setRemoveDestination(config.exitPosition)
 
 local locked = false
+
+local function clearZoneMonsters()
+	local spectators, spectator = Game.getSpectators(Position(31954, 32325, 10), false, false, 13, 13, 13, 13)
+	for i = 1, #spectators do
+		spectator = spectators[i]
+		if spectator:isMonster() then
+			spectator:getPosition():sendMagicEffect(CONST_ME_POFF)
+			spectator:remove()
+		elseif spectator:isPlayer() then
+			spectator:teleportTo(config.exitPosition, true)
+			spectator:getPosition():sendMagicEffect(CONST_ME_TELEPORT)
+			spectator:sendTextMessage(MESSAGE_EVENT_ADVANCE, "You have been teleported out of the area.")
+		end
+	end
+	return true
+end
+
+local function checkBadThoughts()
+	local badThoughtPositions = {
+		Position(31951, 32320, 10),
+		Position(31947, 32330, 10),
+		Position(31957, 32328, 10),
+		Position(31958, 32322, 10),
+		Position(31953, 32331, 10),
+	}
+
+	local badThoughtCount = encounter:countMonsters("Bad Thought")
+	while badThoughtCount < config.minBadThoughts do
+		local randomIndex = math.random(#badThoughtPositions)
+		local randomPos = badThoughtPositions[randomIndex]
+		Game.createMonster("Bad Thought", randomPos)
+		badThoughtCount = badThoughtCount + 1
+	end
+
+	addEvent(checkBadThoughts, 20 * 1000)
+end
+
 local monstersSpawned = false
 
 function encounter:onReset()
@@ -74,6 +112,23 @@ encounter
 					Game.createMonster("Cerebellum", pos)
 				end
 
+				local badThoughtPositions = {
+					Position(31951, 32320, 10),
+					Position(31947, 32330, 10),
+					Position(31957, 32328, 10),
+					Position(31958, 32322, 10),
+					Position(31953, 32331, 10),
+				}
+
+				for i = 1, config.minBadThoughts do
+					local randomIndex = math.random(#badThoughtPositions)
+					local randomPos = badThoughtPositions[randomIndex]
+					Game.createMonster("Bad Thought", randomPos)
+				end
+
+				-- Inicia o verificador automático dos Bad Thoughts
+				addEvent(checkBadThoughts, 20 * 1000)
+
 				monstersSpawned = true
 			end
 		end,
@@ -90,7 +145,6 @@ encounter
 
 encounter:addRemovePlayers():autoAdvance()
 
-encounter:startOnEnter()
 encounter:register()
 
 local teleportBoss = MoveEvent()
@@ -98,6 +152,7 @@ function teleportBoss.onStepIn(creature, item, position, fromPosition)
 	if not creature or not creature:isPlayer() then
 		return false
 	end
+
 	local player = creature
 	if player:getLevel() < config.requiredLevel then
 		player:teleportTo(config.exitPosition, true)
@@ -117,6 +172,7 @@ function teleportBoss.onStepIn(creature, item, position, fromPosition)
 		player:sendTextMessage(MESSAGE_EVENT_ADVANCE, "The boss room is full.")
 		return false
 	end
+
 	local timeLeft = player:getBossCooldown(config.bossName) - os.time()
 	if timeLeft > 0 then
 		player:teleportTo(config.exitPosition, true)
@@ -125,10 +181,16 @@ function teleportBoss.onStepIn(creature, item, position, fromPosition)
 		player:getPosition():sendMagicEffect(CONST_ME_POFF)
 		return false
 	end
+
+	addEvent(clearZoneMonsters, 5 * 60 * 1000)
+
 	player:teleportTo(config.destination)
 	player:getPosition():sendMagicEffect(CONST_ME_TELEPORT)
 	player:setBossCooldown(config.bossName, os.time() + config.timeToFightAgain * 3600)
 	player:sendBosstiaryCooldownTimer()
+
+	monstersSpawned = false
+	encounter:start()
 end
 
 for _, registerPosition in ipairs(entrancesTiles) do

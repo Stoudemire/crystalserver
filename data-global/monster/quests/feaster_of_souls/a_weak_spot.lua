@@ -1,29 +1,25 @@
-local mType = Game.createMonsterType("The Fear Feaster")
+local mType = Game.createMonsterType("A Weak Spot")
 local monster = {}
 
-monster.description = "The Fear Feaster"
+monster.description = "A Weak Spot"
 monster.experience = 30000
 monster.outfit = {
-	lookType = 1276,
-	lookHead = 0,
-	lookBody = 0,
-	lookLegs = 0,
-	lookFeet = 0,
-	lookAddons = 0,
-	lookMount = 0,
+	lookTypeEx = 32726,
 }
+
+monster.health = 420000
+monster.maxHealth = 420000
+monster.race = "undead"
+monster.corpse = 0
+monster.speed = 0
+monster.manaCost = 0
 
 monster.events = {
+	"WeakSpotDamage",
+	"paleWormDeath",
 	"FeasterOfSoulsBossDeath",
-	"FearFeasterTeleport",
+	"AWeakSpotDamage",
 }
-
-monster.health = 300000
-monster.maxHealth = 300000
-monster.race = "undead"
-monster.corpse = 32737
-monster.speed = 125
-monster.manaCost = 0
 
 monster.changeTarget = {
 	interval = 60000,
@@ -31,7 +27,7 @@ monster.changeTarget = {
 }
 
 monster.bosstiary = {
-	bossRaceId = 1873,
+	bossRaceId = 1881,
 	bossRace = RARITY_ARCHFOE,
 }
 
@@ -48,7 +44,7 @@ monster.flags = {
 	hostile = true,
 	convinceable = false,
 	pushable = false,
-	rewardBoss = true,
+	rewardBoss = false,
 	illusionable = false,
 	canPushItems = true,
 	canPushCreatures = false,
@@ -56,7 +52,7 @@ monster.flags = {
 	targetDistance = 1,
 	runHealth = 1,
 	healthHidden = false,
-	isBlockable = false,
+	isBlockable = true,
 	canWalkOnEnergy = true,
 	canWalkOnFire = true,
 	canWalkOnPoison = true,
@@ -66,6 +62,8 @@ monster.light = {
 	level = 0,
 	color = 0,
 }
+
+monster.summon = {}
 
 monster.voices = {
 	interval = 5000,
@@ -96,6 +94,13 @@ monster.loot = {
 	{ name = "bloody tears", chance = 1500 },
 	{ name = "ghost chestplate", chance = 150 },
 	{ name = "spooky hood", chance = 150 },
+	{ name = "pale worm's scalp", chance = 1200 },
+	{ name = "spectral scrap of cloth", chance = 250 },
+	{ name = "fabulous legs", chance = 150 },
+	{ name = "phantasmal axe", chance = 150 },
+	{ name = "ghost backpack", chance = 150 },
+	{ id = 32621, chance = 400 }, -- Ring of souls
+	{ name = "soulful legs", chance = 150 },
 }
 
 monster.attacks = {
@@ -110,24 +115,24 @@ monster.attacks = {
 }
 
 monster.defenses = {
-	defense = 170,
-	armor = 160,
+	defense = 150,
+	armor = 150,
 	--	mitigation = ???,
 	{ name = "speed", interval = 10000, chance = 40, speedChange = 510, effect = CONST_ME_MAGIC_GREEN, target = false, duration = 20000 },
 	{ name = "combat", interval = 5000, chance = 60, type = COMBAT_HEALING, minDamage = 1000, maxDamage = 2500, effect = CONST_ME_MAGIC_BLUE, target = false },
 }
 
 monster.elements = {
-	{ type = COMBAT_PHYSICALDAMAGE, percent = -10 },
-	{ type = COMBAT_ENERGYDAMAGE, percent = -10 },
-	{ type = COMBAT_EARTHDAMAGE, percent = 20 },
-	{ type = COMBAT_FIREDAMAGE, percent = -10 },
+	{ type = COMBAT_PHYSICALDAMAGE, percent = 5 },
+	{ type = COMBAT_ENERGYDAMAGE, percent = 5 },
+	{ type = COMBAT_EARTHDAMAGE, percent = 5 },
+	{ type = COMBAT_FIREDAMAGE, percent = 5 },
 	{ type = COMBAT_LIFEDRAIN, percent = 0 },
 	{ type = COMBAT_MANADRAIN, percent = 0 },
 	{ type = COMBAT_DROWNDAMAGE, percent = 0 },
-	{ type = COMBAT_ICEDAMAGE, percent = 0 },
-	{ type = COMBAT_HOLYDAMAGE, percent = 0 },
-	{ type = COMBAT_DEATHDAMAGE, percent = 100 },
+	{ type = COMBAT_ICEDAMAGE, percent = 5 },
+	{ type = COMBAT_HOLYDAMAGE, percent = 5 },
+	{ type = COMBAT_DEATHDAMAGE, percent = 5 },
 }
 
 monster.immunities = {
@@ -136,5 +141,19 @@ monster.immunities = {
 	{ type = "invisible", condition = true },
 	{ type = "bleed", condition = false },
 }
+
+mType.onThink = function(monster, interval) end
+
+mType.onAppear = function(monster, creature)
+	if monster:getType():isRewardBoss() then
+		monster:setReward(true)
+	end
+end
+
+mType.onDisappear = function(monster, creature) end
+
+mType.onMove = function(monster, creature, fromPosition, toPosition) end
+
+mType.onSay = function(monster, creature, type, message) end
 
 mType:register(monster)

@@ -17,9 +17,13 @@ local config = {
 		{ pos = Position(33774, 31505, 14), teleport = Position(33808, 31513, 14), effect = CONST_ME_TELEPORT },
 		{ pos = Position(33775, 31505, 14), teleport = Position(33808, 31513, 14), effect = CONST_ME_TELEPORT },
 	},
+	monsters = {
+		{ name = "A Weak Spot", pos = Position(33805, 31505, 15) },
+		{ name = "A Stone", pos = Position(33808, 31499, 14) },
+	},
 	specPos = {
 		from = Position(33793, 31496, 14),
-		to = Position(33816, 31515, 14),
+		to = Position(33819, 31518, 14),
 	},
 	exit = Position(33572, 31451, 10),
 }
