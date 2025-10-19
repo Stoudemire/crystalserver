@@ -1672,6 +1672,10 @@ void Player::updatePartyTrackerAnalyzer() const {
 }
 
 void Player::sendLootStats(const std::shared_ptr<Item> &item, uint8_t count) {
+	// Batch loot stats to reduce I/O and allocations
+	batchedTrackerData.lootItems.emplace_back(item, count);
+
+	// Calculate value for metrics
 	uint64_t value = 0;
 	if (item->getID() == ITEM_GOLD_COIN || item->getID() == ITEM_PLATINUM_COIN || item->getID() == ITEM_CRYSTAL_COIN) {
 		if (item->getID() == ITEM_PLATINUM_COIN) {
@@ -1681,47 +1685,128 @@ void Player::sendLootStats(const std::shared_ptr<Item> &item, uint8_t count) {
 		} else {
 			value = count;
 		}
-	} else if (
-		const auto &npc = g_game().getNpcByName("The Lootmonger")
-	) {
+	} else if (const auto &npc = g_game().getNpcByName("The Lootmonger")) {
 		const auto &iType = Item::items.getItemType(item->getID());
 		value = iType.sellPrice * count;
 	}
-	g_metrics().addCounter("player_loot", value, { { "player", getName() } });
+	batchedTrackerData.lootValue += value;
 
-	if (client) {
-		client->sendLootStats(item, count);
-	}
-
-	if (m_party) {
-		m_party->addPlayerLoot(getPlayer(), item);
+	// Schedule batch flush if not already pending
+	if (!trackerBatchPending) {
+		trackerBatchPending = true;
+		const auto self = static_self_cast<Player>();
+		trackerBatchEventId = g_dispatcher().scheduleEvent(
+			250, [self] {
+				self->flushBatchedTrackerData();
+			},
+			"Player::flushBatchedTrackerData"
+		);
 	}
 }
 
 void Player::updateSupplyTracker(const std::shared_ptr<Item> &item) {
+	// Batch supply tracker to reduce I/O and allocations
+	batchedTrackerData.supplyItems.push_back(item);
+
 	const auto &iType = Item::items.getItemType(item->getID());
-	const auto value = iType.buyPrice;
-	g_metrics().addCounter("player_supply", value, { { "player", getName() } });
+	batchedTrackerData.supplyValue += iType.buyPrice;
 
-	if (client) {
-		client->sendUpdateSupplyTracker(item);
-	}
-
-	if (m_party) {
-		m_party->addPlayerSupply(getPlayer(), item);
+	// Schedule batch flush if not already pending
+	if (!trackerBatchPending) {
+		trackerBatchPending = true;
+		const auto self = static_self_cast<Player>();
+		trackerBatchEventId = g_dispatcher().scheduleEvent(
+			250, [self] {
+				self->flushBatchedTrackerData();
+			},
+			"Player::flushBatchedTrackerData"
+		);
 	}
 }
 
 void Player::updateImpactTracker(CombatType_t type, int32_t amount) const {
-	if (client) {
-		client->sendUpdateImpactTracker(type, amount);
+	// Batch impact tracker to reduce I/O and allocations
+	const_cast<Player*>(this)->batchedTrackerData.impactData.emplace_back(type, amount);
+
+	// Schedule batch flush if not already pending
+	if (!trackerBatchPending) {
+		const_cast<Player*>(this)->trackerBatchPending = true;
+		const auto self = const_cast<Player*>(this)->static_self_cast<Player>();
+		const_cast<Player*>(this)->trackerBatchEventId = g_dispatcher().scheduleEvent(
+			250, [self] {
+				self->flushBatchedTrackerData();
+			},
+			"Player::flushBatchedTrackerData"
+		);
 	}
 }
 
 void Player::updateInputAnalyzer(CombatType_t type, int32_t amount, const std::string &target) const {
-	if (client) {
-		client->sendUpdateInputAnalyzer(type, amount, target);
+	// Batch input analyzer to reduce I/O and allocations
+	const_cast<Player*>(this)->batchedTrackerData.inputData.emplace_back(type, amount, target);
+
+	// Schedule batch flush if not already pending
+	if (!trackerBatchPending) {
+		const_cast<Player*>(this)->trackerBatchPending = true;
+		const auto self = const_cast<Player*>(this)->static_self_cast<Player>();
+		const_cast<Player*>(this)->trackerBatchEventId = g_dispatcher().scheduleEvent(
+			250, [self] {
+				self->flushBatchedTrackerData();
+			},
+			"Player::flushBatchedTrackerData"
+		);
 	}
+}
+
+void Player::flushBatchedTrackerData() {
+	trackerBatchPending = false;
+
+	// Send aggregated loot stats
+	if (batchedTrackerData.lootValue > 0) {
+		g_metrics().addCounter("player_loot", batchedTrackerData.lootValue, { { "player", getName() } });
+	}
+
+	// Send individual loot items to client and party
+	for (const auto &[item, count] : batchedTrackerData.lootItems) {
+		if (client) {
+			client->sendLootStats(item, count);
+		}
+		if (m_party) {
+			m_party->addPlayerLoot(getPlayer(), item);
+		}
+	}
+
+	// Send aggregated supply stats
+	if (batchedTrackerData.supplyValue > 0) {
+		g_metrics().addCounter("player_supply", batchedTrackerData.supplyValue, { { "player", getName() } });
+	}
+
+	// Send individual supply items to client and party
+	for (const auto &item : batchedTrackerData.supplyItems) {
+		if (client) {
+			client->sendUpdateSupplyTracker(item);
+		}
+		if (m_party) {
+			m_party->addPlayerSupply(getPlayer(), item);
+		}
+	}
+
+	// Send batched impact tracker data
+	for (const auto &[type, amount] : batchedTrackerData.impactData) {
+		if (client) {
+			client->sendUpdateImpactTracker(type, amount);
+		}
+	}
+
+	// Send batched input analyzer data
+	for (const auto &[type, amount, target] : batchedTrackerData.inputData) {
+		if (client) {
+			client->sendUpdateInputAnalyzer(type, amount, target);
+		}
+	}
+
+	// Clear batched data
+	batchedTrackerData = BatchedTrackerData {};
 }
 
 void Player::createLeaderTeamFinder(NetworkMessage &msg) const {
