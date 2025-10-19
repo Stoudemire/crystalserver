@@ -11072,10 +11072,20 @@ uint8_t Player::getOpenedContainersLimit() const {
 }
 
 void Player::openPlayerContainers() {
-	// skip if client lost connection
 	if (!client) {
 		return;
 	}
+
+	// Throttle container updates to prevent FPS drops during autoloot
+	static std::unordered_map<uint32_t, int64_t> lastContainerUpdate;
+	int64_t currentTime = OTSYS_TIME();
+	int64_t throttleDelay = 100; // 100ms
+
+	if (lastContainerUpdate[getID()] + throttleDelay > currentTime) {
+		return;
+	}
+
+	lastContainerUpdate[getID()] = currentTime;
 
 	std::map<uint8_t, std::shared_ptr<Container>> openContainersList;
 
@@ -11125,9 +11135,21 @@ void Player::openPlayerContainers() {
 // Quickloot
 
 void Player::sendLootContainers() const {
-	if (client) {
-		client->sendLootContainers();
+	if (!client) {
+		return;
 	}
+
+	// Throttle loot container updates to prevent FPS drops during autoloot
+	static std::unordered_map<uint32_t, int64_t> lastLootContainerUpdate;
+	int64_t currentTime = OTSYS_TIME();
+	int64_t throttleDelay = 200; // 200ms
+
+	if (lastLootContainerUpdate[getID()] + throttleDelay > currentTime) {
+		return;
+	}
+
+	lastLootContainerUpdate[getID()] = currentTime;
+	client->sendLootContainers();
 }
 
 void Player::sendSingleSoundEffect(const Position &pos, SoundEffect_t id, SourceEffect_t source) const {

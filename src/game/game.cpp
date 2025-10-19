@@ -3002,6 +3002,17 @@ void Game::playerQuickLootCorpse(const std::shared_ptr<Player> &player, const st
 		return;
 	}
 
+	// Throttle autoloot to prevent FPS drops when gold pouch is open
+	static std::unordered_map<uint32_t, int64_t> lastAutolootUpdate;
+	int64_t currentTime = OTSYS_TIME();
+	int64_t throttleDelay = 50; // 50ms
+
+	if (lastAutolootUpdate[player->getID()] + throttleDelay > currentTime) {
+		return;
+	}
+
+	lastAutolootUpdate[player->getID()] = currentTime;
+
 	std::vector<std::shared_ptr<Item>> itemList;
 	bool ignoreListItems = (player->quickLootFilter == QUICKLOOTFILTER_SKIPPEDLOOT);
 
